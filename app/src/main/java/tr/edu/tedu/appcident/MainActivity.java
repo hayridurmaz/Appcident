@@ -3,6 +3,7 @@ package tr.edu.tedu.appcident;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.google.firebase.FirebaseError;
@@ -23,6 +24,9 @@ public class MainActivity extends AppCompatActivity {
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference("hello").child("greetings");
+       // myRef.setValue("sa","as");
+
+
         final TextView t= (TextView) findViewById(R.id.helloworld);
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

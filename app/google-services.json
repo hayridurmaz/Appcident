@@ -1,35 +1,27 @@
 {
   "project_info": {
-    "project_number": "881165229395",
-    "firebase_url": "https://appcident-7336c.firebaseio.com",
-    "project_id": "appcident-7336c",
-    "storage_bucket": "appcident-7336c.appspot.com"
+    "project_number": "522958273538",
+    "firebase_url": "https://appcident-9d366.firebaseio.com",
+    "project_id": "appcident-9d366",
+    "storage_bucket": "appcident-9d366.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:881165229395:android:7eb0f5ec5af970d9",
+        "mobilesdk_app_id": "1:522958273538:android:7eb0f5ec5af970d9",
         "android_client_info": {
           "package_name": "tr.edu.tedu.appcident"
         }
       },
       "oauth_client": [
         {
-          "client_id": "881165229395-u40p7n8a204u8do3jokabrjh3qq3kjo3.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "tr.edu.tedu.appcident",
-            "certificate_hash": "17eab80760446197ed499b601de5c290ddd308e8"
-          }
-        },
-        {
-          "client_id": "881165229395-5e1n5sbf0cam09bmtkeu34stqmv20gm8.apps.googleusercontent.com",
+          "client_id": "522958273538-9ldsv19bm59urgm5ravu7gtagttfbbrv.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDYg4c9lXFy30YB3sCulWOEe89ZLyTDUyA"
+          "current_key": "AIzaSyDZEnLiQz1GtkkQKqKQotWKKSeIRF08N10"
         }
       ],
       "services": {
@@ -37,13 +29,8 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "881165229395-5e1n5sbf0cam09bmtkeu34stqmv20gm8.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "status": 1,
+          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 2
