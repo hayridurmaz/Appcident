@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Appcident</string>
+    <string name="title_activity_sensor">SensorActivity</string>
+    <string name="label_light1">hmmmmm</string>
 </resources>
