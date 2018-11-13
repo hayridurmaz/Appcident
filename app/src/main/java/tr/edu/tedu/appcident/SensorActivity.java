@@ -15,6 +15,7 @@ import android.widget.TextView;
 import org.w3c.dom.Text;
 
 import java.io.Console;
+import java.text.DecimalFormat;
 
 public class SensorActivity extends Activity implements SensorEventListener {
     private SensorManager mSensorManager;
@@ -76,7 +77,7 @@ public class SensorActivity extends Activity implements SensorEventListener {
 
         String name1 = event.sensor.getName();
         TextView textt = (TextView) findViewById(R.id.label_light);
-        textt.setText(textt.getText() + " " + name1);
+       // textt.setText(textt.getText() + " " + name1);
 
         switch (sensorType){
             case Sensor.TYPE_PRESSURE:
@@ -85,8 +86,8 @@ public class SensorActivity extends Activity implements SensorEventListener {
             case Sensor.TYPE_AMBIENT_TEMPERATURE:
                 break;
 
-            /*case Sensor.TYPE_ACCELEROMETER:
-                String name1 = event.sensor.getName();
+            case Sensor.TYPE_ACCELEROMETER:
+                /*String name1 = event.sensor.getName();
                 TextView textt = (TextView) findViewById(R.id.label_light);
                 textt.setText(textt.getText() + " " + name1);
 
@@ -100,15 +101,29 @@ public class SensorActivity extends Activity implements SensorEventListener {
                 deltaY = 0;
                 if ((deltaX > vibrateThreshold) || (deltaY > 9.81f) || (deltaZ > vibrateThreshold)) {
                 // textt.setText("Oluyor mu acaba???");
-            }
+            }*/
+                double loX = event.values[0];
+                double loY = event.values[1];
+                double loZ = event.values[2];
+
+                double loAccelerationReader = Math.sqrt(Math.pow(loX, 2)
+                        + Math.pow(loY, 2)
+                        + Math.pow(loZ, 2));
+
+                DecimalFormat precision = new DecimalFormat("0,00");
+                double ldAccRound = Double.parseDouble(precision.format(loAccelerationReader));
+
+                if (ldAccRound > 0.3d && ldAccRound < 0.5d) {
+                    textt.setText("Düştü");
+                }
 
                 break;
-*/
+
             case Sensor.TYPE_GYROSCOPE:
                 name1 = event.sensor.getName();
                 textt = (TextView) findViewById(R.id.label_light);
                 textt = (TextView) findViewById(R.id.label_light);
-                textt.setText("Vay aq???");
+                //textt.setText("Vay aq???");
                 break;
 
             case Sensor.TYPE_LIGHT:
