@@ -59,13 +59,15 @@ public class SettingsActivity extends AppCompatActivity {
                 }
                 if (phoneNumber3.length() == 11 && phoneNumber2.length() == 11 && phoneNumber1.length() == 11) {
                     showToast("Now your emergency list is ready!!");
+                    User user = new User(phoneNumber1, phoneNumber2, phoneNumber3);
+                    myRef.child("User1").setValue(user);
+                    Intent intent = new Intent(SettingsActivity.this, SensorActivity.class);
+                    startActivity(intent);
                 }
 
-                User user = new User(phoneNumber1, phoneNumber2, phoneNumber3);
-                myRef.child("User1").setValue(user);
 
-                Intent intent = new Intent(SettingsActivity.this, SensorActivity.class);
-                startActivity(intent);
+
+
             }
         });
 
