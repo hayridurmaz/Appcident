@@ -1,22 +1,17 @@
 package tr.edu.tedu.appcident;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.TextView;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
-public class MainActivity extends AppCompatActivity {
+public class SettingsActivity extends AppCompatActivity {
     String phoneNumber1;
     String phoneNumber2;
     String phoneNumber3;
@@ -28,10 +23,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_settings);
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("Users").child("User1");
+        final DatabaseReference myRef = database.getReference("Users");
         // myRef.setValue("sa","as");
 
 
@@ -65,6 +60,12 @@ public class MainActivity extends AppCompatActivity {
                 if (phoneNumber3.length() == 11 && phoneNumber2.length() == 11 && phoneNumber1.length() == 11) {
                     showToast("Now your emergency list is ready!!");
                 }
+
+                User user = new User(phoneNumber1, phoneNumber2, phoneNumber3);
+                myRef.child("User1").setValue(user);
+
+                Intent intent = new Intent(SettingsActivity.this, SensorActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -72,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showToast(String text){
-        Toast.makeText(MainActivity.this,text,Toast.LENGTH_LONG).show();
+        Toast.makeText(SettingsActivity.this,text,Toast.LENGTH_LONG).show();
     }
 }
 

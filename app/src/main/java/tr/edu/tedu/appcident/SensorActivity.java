@@ -114,6 +114,14 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
         mRotation = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
 
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SensorActivity.this, SettingsActivity.class);
+                startActivity(intent);
+            }
+        });
+
 
     }
 
@@ -295,6 +303,8 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
         super.onPause();
         mSensorManager.unregisterListener(this);
     }
+
+
 /*
     protected void emergencyMode () {
         SurfaceView cameraView = (SurfaceView) findViewById(R.id.CameraView);
