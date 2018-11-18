@@ -63,11 +63,22 @@
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="**These phone numbers will called when the Appcident decide you're in danger."
+            android:text="**These phone numbers will be called when the Appcident decide you're in danger."
             android:textStyle="italic"
             android:textColor="#3F4312"
 
             android:textSize="18dp" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/IMEITextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="14dp"
+        android:text="Your IMEI: "
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
 </RelativeLayout>

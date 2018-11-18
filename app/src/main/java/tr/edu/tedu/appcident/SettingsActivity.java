@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v7.app.AppCompatActivity;
 
@@ -20,6 +21,9 @@ public class SettingsActivity extends AppCompatActivity {
     EditText phoneInput2;
     EditText phoneInput3;
 
+    TextView IMEITextView;
+    String IMEINumber;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,6 +33,11 @@ public class SettingsActivity extends AppCompatActivity {
         final DatabaseReference myRef = database.getReference("Users");
         // myRef.setValue("sa","as");
 
+        Bundle extras = getIntent().getExtras();
+        IMEINumber = extras.getString("IMEINumber");
+
+        IMEITextView = (TextView)findViewById(R.id.IMEITextView);
+        IMEITextView.setText(IMEITextView.getText().toString() + " " + IMEINumber);
 
         phoneInput1 = (EditText) findViewById(R.id.phoneInput1);
         phoneInput2 = (EditText) findViewById(R.id.phoneInput2);
