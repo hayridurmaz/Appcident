@@ -63,7 +63,7 @@
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="**These phone numbers will called when the Appcident decide you're in danger."
+            android:text="**These phone numbers will be called when the Appcident decide you're in danger."
             android:textStyle="italic"
             android:textColor="#3F4312"
 

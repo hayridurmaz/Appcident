@@ -172,7 +172,7 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
                         + Math.pow(loY, 2)
                         + Math.pow(loZ, 2));
 
-                DecimalFormat precision = new DecimalFormat("0,00");// Telefona yüklerken virgül yap
+                DecimalFormat precision = new DecimalFormat("0.00");// Telefona yüklerken virgül yap
                 double ldAccRound = Double.parseDouble(precision.format(loAccelerationReader));
 
                 if (ldAccRound > 0.3d && ldAccRound < 0.5d) {
