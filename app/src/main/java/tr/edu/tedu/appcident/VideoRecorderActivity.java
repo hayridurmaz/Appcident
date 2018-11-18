@@ -1,5 +1,9 @@
 package tr.edu.tedu.appcident;
 
+import android.app.Activity;
+
+/*package tr.edu.tedu.appcident;
+
 import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
@@ -104,5 +108,9 @@ public class VideoRecorderActivity extends Service implements SurfaceHolder.Call
 
     @Override
     public IBinder onBind(Intent intent) { return null; }
+
+}
+*/
+public class VideoRecorderActivity extends Activity {
 
 }
