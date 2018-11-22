@@ -74,10 +74,6 @@ public class SensorActivity extends Activity implements SensorEventListener {
 
         int sensorType = event.sensor.getType();
 
-        String name1 = event.sensor.getName();
-        TextView textt = (TextView) findViewById(R.id.label_light);
-        textt.setText(textt.getText() + " " + name1);
-
         switch (sensorType){
             case Sensor.TYPE_PRESSURE:
                 break;
@@ -85,10 +81,7 @@ public class SensorActivity extends Activity implements SensorEventListener {
             case Sensor.TYPE_AMBIENT_TEMPERATURE:
                 break;
 
-            /*case Sensor.TYPE_ACCELEROMETER:
-                String name1 = event.sensor.getName();
-                TextView textt = (TextView) findViewById(R.id.label_light);
-                textt.setText(textt.getText() + " " + name1);
+            case Sensor.TYPE_ACCELEROMETER:
 
                 deltaX = Math.abs(lastX - event.values[0]);
                 deltaY = Math.abs(lastY - event.values[1]);
@@ -98,17 +91,20 @@ public class SensorActivity extends Activity implements SensorEventListener {
                 deltaX = 0;
                 if (deltaY < 2)
                 deltaY = 0;
-                if ((deltaX > vibrateThreshold) || (deltaY > 9.81f) || (deltaZ > vibrateThreshold)) {
-                // textt.setText("Oluyor mu acaba???");
+                if ((deltaX > vibrateThreshold) || (deltaY != 9.81f) || (deltaZ > vibrateThreshold)) {
+                textt.setText("Oluyor mu acaba???");
             }
 
                 break;
-*/
+
             case Sensor.TYPE_GYROSCOPE:
                 name1 = event.sensor.getName();
                 textt = (TextView) findViewById(R.id.label_light);
                 textt = (TextView) findViewById(R.id.label_light);
-                textt.setText("Vay aq???");
+                textt.setText("Oluyor mu??");
+                name1 = event.sensor.getName();
+                textt = (TextView) findViewById(R.id.label_light);
+                textt.setText(textt.getText() + " " + name1);
                 break;
 
             case Sensor.TYPE_LIGHT:
@@ -123,12 +119,12 @@ public class SensorActivity extends Activity implements SensorEventListener {
         // Register a listener for the sensor.
         super.onResume();
 
-        mSensorManager.registerListener(this, mPressure, SensorManager.SENSOR_DELAY_NORMAL);
+        //mSensorManager.registerListener(this, mPressure, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mAcceleration, SensorManager.SENSOR_DELAY_NORMAL);
-        mSensorManager.registerListener(this, mHeat, SensorManager.SENSOR_DELAY_NORMAL);
+        //mSensorManager.registerListener(this, mHeat, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
-        mSensorManager.registerListener(this, mLight, SensorManager.SENSOR_DELAY_NORMAL);
-        mSensorManager.registerListener(this, mRotation, SensorManager.SENSOR_DELAY_NORMAL);
+        //mSensorManager.registerListener(this, mLight, SensorManager.SENSOR_DELAY_NORMAL);
+        //mSensorManager.registerListener(this, mRotation, SensorManager.SENSOR_DELAY_NORMAL);
 
     }
 
