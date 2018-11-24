@@ -3,4 +3,9 @@
     <string name="title_activity_sensor">SensorActivity</string>
     <string name="label_light1">hmmmmm</string>
     <string name="settings">Settings</string>
+    <string name="please_enter_3_phone_numbers_to_call_in_case_of_emergency">Please enter 3 phone numbers to call in case of emergency</string>
+    <string name="your_imei">Your IMEI:</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="submit">SUBMIT</string>
+    <string name="these_phone_numbers_will_be_called_when_the_appcident_decide_you_re_in_danger">**These phone numbers will be called when the Appcident decide you\'re in danger.</string>
 </resources>

@@ -22,15 +22,18 @@
             android:id="@+id/textView2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Please enter 3 phone numbers to call in case of emergency" />
+            android:textColor="@color/colorPrimaryDark"
+            android:text="@string/please_enter_3_phone_numbers_to_call_in_case_of_emergency" />
 
         <EditText
             android:id="@+id/phoneInput1"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:background="@drawable/border"
+            android:textColorHint="@color/colorPrimaryDark"
             android:ems="10"
-            android:hint="Phone Number"
+            android:textColor="@color/colorPrimaryDark"
+            android:hint="@string/phone_number"
             android:inputType="phone" />
 
         <EditText
@@ -39,7 +42,8 @@
             android:layout_height="40dp"
             android:background="@drawable/border"
             android:ems="10"
-            android:hint="Phone Number"
+            android:hint="@string/phone_number"
+            android:textColorHint="@color/colorPrimaryDark"
             android:inputType="phone" />
 
         <EditText
@@ -48,7 +52,8 @@
             android:layout_height="40dp"
             android:background="@drawable/border"
             android:ems="10"
-            android:hint="Phone Number"
+            android:hint="@string/phone_number"
+            android:textColorHint="@color/colorPrimaryDark"
             android:inputType="phone" />
 
         <Button
@@ -57,14 +62,14 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="110dp"
             android:background="#d2d2d2"
-            android:text="SUBMIT"
+            android:text="@string/submit"
             android:textColor="#000000" />
 
         <TextView
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="**These phone numbers will be called when the Appcident decide you're in danger."
+            android:text="@string/these_phone_numbers_will_be_called_when_the_appcident_decide_you_re_in_danger"
             android:textStyle="italic"
             android:textColor="#3F4312"
 
@@ -78,8 +83,9 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="14dp"
-        android:text="Your IMEI: "
+        android:text="@string/your_imei"
         android:textSize="18sp"
+        android:textColor="@color/colorPrimaryDark"
         android:textStyle="bold" />
 
 </RelativeLayout>
