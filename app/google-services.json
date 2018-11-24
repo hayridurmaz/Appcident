@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "522958273538",
+    "firebase_url": "https://appcident-9d366.firebaseio.com",
+    "project_id": "appcident-9d366",
+    "storage_bucket": "appcident-9d366.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:522958273538:android:7eb0f5ec5af970d9",
+        "android_client_info": {
+          "package_name": "tr.edu.tedu.appcident"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "522958273538-9ldsv19bm59urgm5ravu7gtagttfbbrv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZEnLiQz1GtkkQKqKQotWKKSeIRF08N10"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
