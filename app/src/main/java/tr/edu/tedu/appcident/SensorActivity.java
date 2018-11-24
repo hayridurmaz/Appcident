@@ -23,6 +23,9 @@ import android.support.v4.app.ActivityCompat;
 import android.telephony.TelephonyManager;
 import android.util.FloatMath;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -80,6 +83,23 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
 
     TextView output;
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.toolbar, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.settings) {
+            Intent intent = new Intent(SensorActivity.this, SettingsActivity.class);
+            intent.putExtra("IMEINumber", IMEINumber);
+            startActivity(intent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public final void onCreate(Bundle savedInstanceState) {
@@ -134,9 +154,9 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(SensorActivity.this, SettingsActivity.class);
-                intent.putExtra("IMEINumber", IMEINumber);
-                startActivity(intent);
+//                Intent intent = new Intent(SensorActivity.this, SettingsActivity.class);
+//                intent.putExtra("IMEINumber", IMEINumber);
+//                startActivity(intent);
             }
         });
 /*
