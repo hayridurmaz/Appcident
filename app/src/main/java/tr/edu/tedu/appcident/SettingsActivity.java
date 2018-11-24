@@ -129,7 +129,7 @@ public class SettingsActivity extends Activity {
 
     }
 
-    private void showToast(String text){
+    public void showToast(String text){
         Toast.makeText(SettingsActivity.this,text,Toast.LENGTH_LONG).show();
     }
 }

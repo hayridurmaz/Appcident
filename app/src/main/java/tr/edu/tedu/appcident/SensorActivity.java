@@ -12,6 +12,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.CamcorderProfile;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
@@ -47,8 +48,10 @@ import org.w3c.dom.Text;
 import java.io.Console;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Time;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
@@ -63,6 +66,7 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
     private Sensor mRotation;
 
     private static String IMEINumber;
+    static String  currentPath;
 
     private Button start, stop;
 
@@ -185,16 +189,16 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
 //                    }
 
 
-                String  AudioSavePathInDevice =
+                String AudioSavePathInDevice =
                         Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +
-                                "sa" + "AudioRecording.3gp";
+                                Calendar.getInstance().getTime()+ "AudioRecording.3gp";
 
+                currentPath=AudioSavePathInDevice;
                 mediaRecorder=new MediaRecorder();
                 mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
                 mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
                 mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
                 mediaRecorder.setOutputFile(AudioSavePathInDevice);
-
                 try {
                     mediaRecorder.prepare();
                     mediaRecorder.start();
@@ -217,12 +221,33 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
 
 
                 mediaRecorder.stop();
+                Toast.makeText(SensorActivity.this,"Kayıt durduruldu",Toast.LENGTH_LONG).show();
+
+                MediaPlayer mp = new MediaPlayer();
+                try{
+                    mp.setDataSource(currentPath);
+
+                }
+                catch (Exception e){
+
+                }
+                mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(MediaPlayer mp) {
+                        // Do something. For example: playButton.setEnabled(true);
+                        mp.start();
+                    }
+                });
+                mp.prepareAsync();
+
 
 
             }
         });
 
 
+    }
+    public void onPrepared(MediaPlayer player) {
     }
 
     @Override
@@ -285,6 +310,8 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
 
                 if (acceleration > 55) {
                     textt.setText("Düştü");
+                    start.performClick();
+                    Toast.makeText(SensorActivity.this,"Düştü, kayıt başlatıldı",Toast.LENGTH_LONG).show();
                     //emergencyMode();
                 }
 
