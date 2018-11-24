@@ -20,6 +20,8 @@ import android.os.Debug;
 import android.os.Environment;
 import android.os.Vibrator;
 import android.support.v4.app.ActivityCompat;
+import android.telephony.TelephonyManager;
+import android.util.FloatMath;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -29,6 +31,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -46,7 +49,7 @@ import java.text.SimpleDateFormat;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
 public class SensorActivity extends Activity implements SensorEventListener/*, View.OnClickListener, SurfaceHolder.Callback*/ {
-    private static final int INTENTCAPTURE_VIDEO_ACTIVITY_REQUEST_CODE =200 ;
+    private static final int INTENTCAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
     private SensorManager mSensorManager;
     private Sensor mPressure;
     private Sensor mHeat;
@@ -55,7 +58,12 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
     private Sensor mLight;
     private Sensor mRotation;
 
+    private static String IMEINumber;
+
     private Button settingsButton;
+    private Button cameraButton;
+
+    private float accelerationCurrent, accelerationLast, acceleration;
 
     private float deltaX = 0;
     private float deltaY = 0;
@@ -72,9 +80,6 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
 
     TextView output;
 
-    int YOUR_REQUEST_CODE = 200; // could be something else..
-
-
 
     @Override
     public final void onCreate(Bundle savedInstanceState) {
@@ -90,21 +95,29 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) //check if permission request is necessary
         {
-            ActivityCompat.requestPermissions(this, new String[] {android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, YOUR_REQUEST_CODE);
+            ActivityCompat.requestPermissions(this, new String[] {android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 200);
         }
 
         initRecorder();
 */
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, 200);
+        }
+
+        TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+        telephonyManager.getDeviceId();
+        IMEINumber = telephonyManager.getDeviceId();
+
         setContentView(R.layout.activity_sensor);
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference("Users").child("User1");
 
         settingsButton = (Button)findViewById(R.id.button1);
-
+        cameraButton = (Button) findViewById(R.id.button2);
         output = (TextView) findViewById(R.id.label_light);
-        // Get an instance of the sensor service, and use that to get an instance of
-        // a particular sensor.
+
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mPressure = mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
         mHeat = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
@@ -113,15 +126,28 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
         mLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         mRotation = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
+        accelerationCurrent = SensorManager.GRAVITY_EARTH;
+        accelerationLast = SensorManager.GRAVITY_EARTH;
+        acceleration = 0.0f;
+
 
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(SensorActivity.this, SettingsActivity.class);
+                intent.putExtra("IMEINumber", IMEINumber);
                 startActivity(intent);
             }
         });
-
+/*
+        cameraButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SensorActivity.this, VideoRecorderActivity.CAMERA_SERVICE);
+                startService()
+            }
+        });
+*/
 
     }
 
@@ -164,18 +190,26 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
                 if ((deltaX > vibrateThreshold) || (deltaY > 9.81f) || (deltaZ > vibrateThreshold)) {
                 // textt.setText("Oluyor mu acaba???");
             }*/
-                double loX = event.values[0];
-                double loY = event.values[1];
-                double loZ = event.values[2];
+                float X = event.values[0];
+                float Y = event.values[1];
+                float Z = event.values[2];
 
-                double loAccelerationReader = Math.sqrt(Math.pow(loX, 2)
-                        + Math.pow(loY, 2)
-                        + Math.pow(loZ, 2));
+                accelerationLast = accelerationCurrent;
 
-                DecimalFormat precision = new DecimalFormat("0.00");// Telefona yüklerken virgül yap
-                double ldAccRound = Double.parseDouble(precision.format(loAccelerationReader));
+                accelerationCurrent = (float)Math.sqrt(Math.pow(X, 2)
+                        + Math.pow(Y, 2)
+                        + Math.pow(Z, 2));
 
-                if (ldAccRound > 0.3d && ldAccRound < 0.5d) {
+                float delta = accelerationCurrent - accelerationLast;
+
+                acceleration = acceleration * 0.9f + delta;
+
+
+                //DecimalFormat precision = new DecimalFormat("0,00");// Telefona yüklerken virgül yap
+                //double ldAccRound = Double.parseDouble(precision.format(accelerationCurrent));
+
+
+                if (acceleration > 55) {
                     textt.setText("Düştü");
                     //emergencyMode();
                 }
