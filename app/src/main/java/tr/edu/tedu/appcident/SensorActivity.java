@@ -228,10 +228,15 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
             public void onClick(View v) {
 
 
-                mediaRecorder.stop();
+                try{
+                    mediaRecorder.stop();
+                }
+                catch (Exception e){
+
+                }
                 Toast.makeText(SensorActivity.this,"Kayıt durduruldu",Toast.LENGTH_LONG).show();
 
-                MediaPlayer mp = new MediaPlayer();
+               /* MediaPlayer mp = new MediaPlayer();
                 try{
                     mp.setDataSource(currentPath);
 
@@ -246,7 +251,7 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
                         mp.start();
                     }
                 });
-                mp.prepareAsync();
+                mp.prepareAsync();*/
 
 
 
