@@ -47,6 +47,7 @@ import org.w3c.dom.Text;
 
 import java.io.Console;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Time;
 import java.text.DecimalFormat;
@@ -189,9 +190,14 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
 //                    }
 
 
-                String AudioSavePathInDevice =
-                        Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +
-                                Calendar.getInstance().getTime()+ "AudioRecording.3gp";
+                File folder = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +"APPCIDENT");
+                if (!folder.exists()) {
+                    folder.mkdirs();
+                }
+
+                String AudioSavePathInDevice = folder
+                        .getAbsolutePath()+"/"+
+                                Calendar.getInstance().getTime()+ ".3gp";
 
                 currentPath=AudioSavePathInDevice;
                 mediaRecorder=new MediaRecorder();
@@ -207,8 +213,10 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
                     e.printStackTrace();
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
+
                     e.printStackTrace();
                 }
+
 
 
             }
