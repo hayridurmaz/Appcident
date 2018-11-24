@@ -12,27 +12,29 @@
         android:id="@+id/label_light"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="SERY"
+        android:text="SENSOR DATA"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/start"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="41dp"
-        android:text="SETTINGS"
-        app:layout_anchorGravity="right|center"
+        android:layout_marginBottom="144dp"
+        android:text="Start"
+        app:layout_anchorGravity="right|bottom"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/stop"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="205dp"
-        android:text="Camera"
+        android:text="Stop"
         app:layout_anchorGravity="right|bottom"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

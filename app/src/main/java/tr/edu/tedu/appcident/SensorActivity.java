@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.Environment;
 import android.os.Vibrator;
+import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.telephony.TelephonyManager;
 import android.util.FloatMath;
@@ -63,8 +64,7 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
 
     private static String IMEINumber;
 
-    private Button settingsButton;
-    private Button cameraButton;
+    private Button start, stop;
 
     private float accelerationCurrent, accelerationLast, acceleration;
 
@@ -82,6 +82,9 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
     public Vibrator v;
 
     TextView output;
+    MediaRecorder mediaRecorder = new MediaRecorder();
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -104,6 +107,8 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
     @Override
     public final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_sensor);
+
 /*
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -124,18 +129,29 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, 200);
         }
+        else{
+            TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+            telephonyManager.getDeviceId();
+            IMEINumber = telephonyManager.getDeviceId();
+        }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 200);
+        }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 200);
+        }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 200);
+        }
 
-        TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
-        telephonyManager.getDeviceId();
-        IMEINumber = telephonyManager.getDeviceId();
 
-        setContentView(R.layout.activity_sensor);
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference("Users").child("User1");
 
-        settingsButton = (Button)findViewById(R.id.button1);
-        cameraButton = (Button) findViewById(R.id.button2);
+        start = (Button) findViewById(R.id.start);
+        stop = (Button) findViewById(R.id.stop);
+
         output = (TextView) findViewById(R.id.label_light);
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -151,23 +167,61 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
         acceleration = 0.0f;
 
 
-        settingsButton.setOnClickListener(new View.OnClickListener() {
+
+
+        start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Intent intent = new Intent(SensorActivity.this, SettingsActivity.class);
-//                intent.putExtra("IMEINumber", IMEINumber);
-//                startActivity(intent);
+                // Intent intent = new Intent(SensorActivity.this, VideoRecorderActivity.CAMERA_SERVICE);
+                // startService()
+
+
+//                final int REQUEST_VIDEO_CAPTURE = 1;
+//
+//
+//                    Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+//                    if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
+//                        startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
+//                    }
+
+
+                String  AudioSavePathInDevice =
+                        Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +
+                                "sa" + "AudioRecording.3gp";
+
+                mediaRecorder=new MediaRecorder();
+                mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+                mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
+                mediaRecorder.setOutputFile(AudioSavePathInDevice);
+
+                try {
+                    mediaRecorder.prepare();
+                    mediaRecorder.start();
+                } catch (IllegalStateException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+
             }
         });
-/*
-        cameraButton.setOnClickListener(new View.OnClickListener() {
+
+
+        stop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(SensorActivity.this, VideoRecorderActivity.CAMERA_SERVICE);
-                startService()
+
+
+                mediaRecorder.stop();
+
+
             }
         });
-*/
+
 
     }
 
