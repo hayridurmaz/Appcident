@@ -44,6 +44,7 @@
             android:ems="10"
             android:hint="@string/phone_number"
             android:textColorHint="@color/colorPrimaryDark"
+            android:textColor="@color/colorPrimaryDark"
             android:inputType="phone" />
 
         <EditText
@@ -54,6 +55,7 @@
             android:ems="10"
             android:hint="@string/phone_number"
             android:textColorHint="@color/colorPrimaryDark"
+            android:textColor="@color/colorPrimaryDark"
             android:inputType="phone" />
 
         <Button
@@ -87,5 +89,17 @@
         android:textSize="18sp"
         android:textColor="@color/colorPrimaryDark"
         android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/addedPhones"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/IMEITextView"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="59dp"
+        android:layout_marginTop="11dp"
+        android:text=""
+        android:textColor="@color/colorPrimaryDark"
+        tools:text="You have not added any phone numbers yet" />
 
 </RelativeLayout>
