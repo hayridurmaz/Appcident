@@ -76,6 +76,7 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
     private float deltaX = 0;
     private float deltaY = 0;
     private float deltaZ = 0;
+    private double rootSquare=0;
     private float lastX, lastY, lastZ;
 
     private float vibrateThreshold = 0;
@@ -86,7 +87,7 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
 
     public Vibrator v;
 
-    TextView output;
+    TextView output, textt;
     MediaRecorder mediaRecorder = new MediaRecorder();
 
 
@@ -170,6 +171,8 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
         accelerationCurrent = SensorManager.GRAVITY_EARTH;
         accelerationLast = SensorManager.GRAVITY_EARTH;
         acceleration = 0.0f;
+
+        textt = (TextView) findViewById(R.id.label_light);
 
 
 
@@ -277,7 +280,7 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
         int sensorType = event.sensor.getType();
 
         String name1 = event.sensor.getName();
-        TextView textt = (TextView) findViewById(R.id.label_light);
+
        // textt.setText(textt.getText() + " " + name1);
 
         switch (sensorType){
@@ -317,30 +320,35 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
 
                 acceleration = acceleration * 0.9f + delta;
 
+                float a = event.values[0];
+                float b = event.values[1];
+                float c = event.values[2];
+
+                rootSquare=Math.sqrt(Math.pow(a,2)+Math.pow(b,2)+Math.pow(c,2));
+                if(rootSquare<2.0)
+                {
+                    emergencyMode();
+                }
+
 
                 DecimalFormat precision = new DecimalFormat("0,00");// Telefona yüklerken virgül yap
                 double ldAccRound = Double.parseDouble(precision.format(accelerationCurrent));
 
-
+/*
                 if (ldAccRound > 0.3d && ldAccRound < 0.5d) {
-                    textt.setText("Düştü");
-                    start.performClick();
-                    Toast.makeText(SensorActivity.this,"Düştü, kayıt başlatıldı",Toast.LENGTH_LONG).show();
-                }
-                if (acceleration > 55) {
-                    textt.setText("Düştü");
-                    start.performClick();
-                    Toast.makeText(SensorActivity.this,"Düştü, kayıt başlatıldı",Toast.LENGTH_LONG).show();
-                    //emergencyMode();
+                    emergencyMode();
                 }
 
+                if (acceleration > 51) {
+                    emergencyMode();
+                }
+*/
                 break;
 
             case Sensor.TYPE_GYROSCOPE:
                 name1 = event.sensor.getName();
                 textt = (TextView) findViewById(R.id.label_light);
-                textt = (TextView) findViewById(R.id.label_light);
-                //textt.setText("Vay aq???");
+                //textt.setText("Vay???");
                 break;
 
             case Sensor.TYPE_LIGHT:
@@ -459,8 +467,9 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
     }
 
 
-/*
+
     protected void emergencyMode () {
+        /*
         SurfaceView cameraView = (SurfaceView) findViewById(R.id.CameraView);
         holder = cameraView.getHolder();
         holder.addCallback(this);
@@ -468,7 +477,13 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
 
         cameraView.setClickable(true);
         cameraView.setOnClickListener(this);
+        */
+
+        textt.setText("Düştü");
+        start.performClick();
+        Toast.makeText(SensorActivity.this,"Düştü, kayıt başlatıldı",Toast.LENGTH_LONG).show();
     }
+    /*
 
     private void initRecorder() {
         recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);

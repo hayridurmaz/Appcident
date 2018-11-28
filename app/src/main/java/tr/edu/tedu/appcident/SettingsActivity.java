@@ -76,7 +76,7 @@ public class SettingsActivity extends Activity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // Get Post object and use the values to update the UI
-                if(dataSnapshot.child(IMEINumber).exists()){
+                if(dataSnapshot.child(IMEINumber+"").exists()){
                     AddedPhones.setText("Numbers that you have added: \n-"+dataSnapshot.child(IMEINumber).child("number1").getValue()+"\n-"+dataSnapshot.child(IMEINumber).child("number2").getValue()+"\n-"+dataSnapshot.child(IMEINumber).child("number3").getValue());
                 }
 
