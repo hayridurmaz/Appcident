@@ -189,7 +189,8 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
 //                        startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
 //                    }
 
-
+                Intent i = new Intent(SensorActivity.this,VideoCapture.class);
+                startActivity(i);
                 File folder = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +"APPCIDENT");
                 if (!folder.exists()) {
                     folder.mkdirs();
@@ -317,10 +318,15 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
                 acceleration = acceleration * 0.9f + delta;
 
 
-                //DecimalFormat precision = new DecimalFormat("0,00");// Telefona yüklerken virgül yap
-                //double ldAccRound = Double.parseDouble(precision.format(accelerationCurrent));
+                DecimalFormat precision = new DecimalFormat("0,00");// Telefona yüklerken virgül yap
+                double ldAccRound = Double.parseDouble(precision.format(accelerationCurrent));
 
 
+                if (ldAccRound > 0.3d && ldAccRound < 0.5d) {
+                    textt.setText("Düştü");
+                    start.performClick();
+                    Toast.makeText(SensorActivity.this,"Düştü, kayıt başlatıldı",Toast.LENGTH_LONG).show();
+                }
                 if (acceleration > 55) {
                     textt.setText("Düştü");
                     start.performClick();
