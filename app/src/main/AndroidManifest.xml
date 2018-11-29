@@ -27,7 +27,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".SensorActivity">
+        <activity android:name=".SensorActivity" android:theme="@style/Theme.AppCompat">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -22,6 +23,7 @@ import android.os.Environment;
 import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.telephony.TelephonyManager;
 import android.util.FloatMath;
 import android.util.Log;
@@ -53,6 +55,8 @@ import java.sql.Time;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
@@ -65,7 +69,8 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
     private Sensor mGyroscope;
     private Sensor mLight;
     private Sensor mRotation;
-
+    static boolean isEmergancyMode;
+    static boolean shouldGoIntoEmergencyMode;
     private static String IMEINumber;
     static String  currentPath;
 
@@ -90,7 +95,7 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
     TextView output, textt;
     MediaRecorder mediaRecorder = new MediaRecorder();
 
-
+    static DialogInterface currentDialogInterface;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -114,6 +119,8 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
     public final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sensor);
+
+        isEmergancyMode=false;
 
 /*
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -192,35 +199,7 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
 //                        startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
 //                    }
 
-                Intent i = new Intent(SensorActivity.this,VideoCapture.class);
-                startActivity(i);
-                File folder = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +"APPCIDENT");
-                if (!folder.exists()) {
-                    folder.mkdirs();
-                }
-
-                String AudioSavePathInDevice = folder
-                        .getAbsolutePath()+"/"+
-                                Calendar.getInstance().getTime()+ ".3gp";
-
-                currentPath=AudioSavePathInDevice;
-                mediaRecorder=new MediaRecorder();
-                mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-                mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-                mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
-                mediaRecorder.setOutputFile(AudioSavePathInDevice);
-                try {
-                    mediaRecorder.prepare();
-                    mediaRecorder.start();
-                } catch (IllegalStateException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-
-                    e.printStackTrace();
-                }
-
+                emergencyMode();
 
 
             }
@@ -234,6 +213,8 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
 
                 try{
                     mediaRecorder.stop();
+                    isEmergancyMode=false;
+                    shouldGoIntoEmergencyMode=false;
                 }
                 catch (Exception e){
 
@@ -267,6 +248,39 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
     public void onPrepared(MediaPlayer player) {
     }
 
+
+    private void doOnEmergency(){
+        Intent i = new Intent(SensorActivity.this,VideoCapture.class);
+        //startActivity(i);
+        File folder = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +"APPCIDENT");
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+
+        String AudioSavePathInDevice = folder
+                .getAbsolutePath()+"/"+
+                Calendar.getInstance().getTime()+ ".3gp";
+
+        currentPath=AudioSavePathInDevice;
+        mediaRecorder=new MediaRecorder();
+        mediaRecorder.reset();
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
+        mediaRecorder.setOutputFile(AudioSavePathInDevice);
+        try {
+            mediaRecorder.prepare();
+            mediaRecorder.start();
+        } catch (IllegalStateException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+
+            e.printStackTrace();
+        }
+
+    }
     @Override
     public final void onAccuracyChanged(Sensor sensor, int accuracy) {
         // Do something here if sensor accuracy changes.
@@ -288,6 +302,10 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
                 break;
 
             case Sensor.TYPE_AMBIENT_TEMPERATURE:
+                float x = event.values[0];
+                if(x>80){
+                    emergencyMode();
+                }
                 break;
 
             case Sensor.TYPE_ACCELEROMETER:
@@ -331,7 +349,7 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
                 }
 
 
-                DecimalFormat precision = new DecimalFormat("0,00");// Telefona yüklerken virgül yap
+                DecimalFormat precision = new DecimalFormat("0.00");// Telefona yüklerken virgül yap
                 double ldAccRound = Double.parseDouble(precision.format(accelerationCurrent));
 
 /*
@@ -478,10 +496,93 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
         cameraView.setClickable(true);
         cameraView.setOnClickListener(this);
         */
+        if(!isEmergancyMode){
+            isEmergancyMode=true;
+            textt.setText("Düştü");
+            AlertDialog.Builder builder1 = new AlertDialog.Builder(SensorActivity.this);
+            builder1.setMessage("Is there something wrong?.");
+            builder1.setCancelable(false);
 
-        textt.setText("Düştü");
-        start.performClick();
-        Toast.makeText(SensorActivity.this,"Düştü, kayıt başlatıldı",Toast.LENGTH_LONG).show();
+            shouldGoIntoEmergencyMode=true;
+            builder1.setPositiveButton(
+                    "I'Am OKAY",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                            shouldGoIntoEmergencyMode=false;
+
+                        }
+                    });
+
+            final AlertDialog alert11 = builder1.create();
+            alert11.show();
+
+            alert11.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+
+                }
+            });
+
+            final Timer timer2 = new Timer();
+            timer2.schedule(new TimerTask() {
+                public void run() {
+
+                    timer2.cancel(); //this will cancel the timer of the system
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(SensorActivity.this,"shouldGoIntoEmergencyMode: "+shouldGoIntoEmergencyMode,Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+                    alert11.cancel();
+                    if(shouldGoIntoEmergencyMode) {
+                        doOnEmergency();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(SensorActivity.this,"No response, emerggency mode is started",Toast.LENGTH_LONG).show();
+                            }
+                        });
+
+                    }
+                    else{
+                        isEmergancyMode=false;
+                    }
+                }
+            }, 5000); // the timer will count 5 seconds....
+
+
+
+           /* if(shouldGoIntoEmergencyMode) {
+                Thread timerThread = new Thread() {
+                    public void run() {
+                        try {
+                            sleep(5000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        } finally {
+
+
+                            doOnEmergency();
+                            if (alert11 != null) {
+                                alert11.cancel();
+                            }
+                            // Toast.makeText(SensorActivity.this,"No response, emerggency mode is started",Toast.LENGTH_LONG).show();
+
+                        }
+                    }
+                };
+                timerThread.start();
+            }*/
+
+
+        }
+        else{
+            //shouldGoIntoEmergencyMode=false;
+        }
+
     }
     /*
 
