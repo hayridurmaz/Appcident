@@ -15,6 +15,8 @@ import android.hardware.SensorManager;
 import android.media.CamcorderProfile;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -349,7 +351,7 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
                 }
 
 
-                DecimalFormat precision = new DecimalFormat("0.00");// Telefona yüklerken virgül yap
+                DecimalFormat precision = new DecimalFormat("0,00");// Telefona yüklerken virgül yap
                 double ldAccRound = Double.parseDouble(precision.format(accelerationCurrent));
 
 /*
@@ -504,13 +506,18 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
             builder1.setCancelable(false);
 
             shouldGoIntoEmergencyMode=true;
+
+            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            final Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+            r.play();
+
             builder1.setPositiveButton(
                     "I'Am OKAY",
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             dialog.cancel();
                             shouldGoIntoEmergencyMode=false;
-
+                            r.stop();
                         }
                     });
 
@@ -529,20 +536,17 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
                 public void run() {
 
                     timer2.cancel(); //this will cancel the timer of the system
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(SensorActivity.this,"shouldGoIntoEmergencyMode: "+shouldGoIntoEmergencyMode,Toast.LENGTH_LONG).show();
-                        }
-                    });
+
 
                     alert11.cancel();
+                    r.stop();
                     if(shouldGoIntoEmergencyMode) {
                         doOnEmergency();
+
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(SensorActivity.this,"No response, emerggency mode is started",Toast.LENGTH_LONG).show();
+                                Toast.makeText(SensorActivity.this,"No response, emergency mode is started",Toast.LENGTH_LONG).show();
                             }
                         });
 
