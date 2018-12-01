@@ -13,6 +13,11 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.media.CamcorderProfile;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -45,6 +50,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -60,13 +68,16 @@ import java.io.IOException;
 import java.sql.Time;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
-public class SensorActivity extends AppCompatActivity implements SensorEventListener/*, View.OnClickListener, SurfaceHolder.Callback*/ {
+public class SensorActivity extends AppCompatActivity implements SensorEventListener , LocationListener/*, View.OnClickListener, SurfaceHolder.Callback*/ {
     private static final int INTENTCAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
     private SensorManager mSensorManager;
     private Sensor mPressure;
@@ -78,7 +89,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     static boolean isEmergancyMode;
     static boolean shouldGoIntoEmergencyMode;
     private static String IMEINumber;
-    static String  currentPath;
+    static String currentPath;
 
     private Button start, stop;
 
@@ -87,7 +98,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     private float deltaX = 0;
     private float deltaY = 0;
     private float deltaZ = 0;
-    private double rootSquare=0;
+    private double rootSquare = 0;
     private float lastX, lastY, lastZ;
 
     private float vibrateThreshold = 0;
@@ -97,11 +108,15 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     boolean recording = false;
 
     public Vibrator v;
+    double LAT, LON;
 
     TextView output, textt;
     MediaRecorder mediaRecorder = new MediaRecorder();
 
+    private FusedLocationProviderClient mFusedLocationClient;
+    String currentAddress;
     static DialogInterface currentDialogInterface;
+    LocationManager locationManager;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -121,6 +136,20 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent intent = new Intent(getApplicationContext(),LocationUpdateService.class);
+        startService(intent);
+    }
+
+    @Override
+    protected void onStop() {
+        Intent intent = new Intent(getApplicationContext(),LocationUpdateService.class);
+        stopService(intent);
+        super.onStop();
+    }
+
     private void sendSMS(String phoneNumber, String message) {
         SmsManager sms = SmsManager.getDefault();
         sms.sendTextMessage(phoneNumber, null, message, null, null);
@@ -132,10 +161,25 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         requestWindowFeature(Window.FEATURE_ACTION_BAR);
         setContentView(R.layout.activity_sensor);
 
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+
+
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
 
 
         //getSupportActionBar();
-        isEmergancyMode=false;
+        isEmergancyMode = false;
 
 /*
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -154,11 +198,10 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         initRecorder();
 */
 
-       if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, 200);
-        }
-        else{
-            TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+        } else {
+            TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
             telephonyManager.getDeviceId();
             IMEINumber = telephonyManager.getDeviceId();
         }
@@ -200,8 +243,6 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         textt = (TextView) findViewById(R.id.label_light);
 
 
-
-
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -229,15 +270,14 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
             public void onClick(View v) {
 
 
-                try{
+                try {
                     mediaRecorder.stop();
-                    isEmergancyMode=false;
-                    shouldGoIntoEmergencyMode=false;
-                }
-                catch (Exception e){
+                    isEmergancyMode = false;
+                    shouldGoIntoEmergencyMode = false;
+                } catch (Exception e) {
 
                 }
-                Toast.makeText(SensorActivity.this,"Kayıt durduruldu",Toast.LENGTH_LONG).show();
+                Toast.makeText(SensorActivity.this, "Kayıt durduruldu", Toast.LENGTH_LONG).show();
 
                /* MediaPlayer mp = new MediaPlayer();
                 try{
@@ -257,31 +297,50 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                 mp.prepareAsync();*/
 
 
-
             }
         });
 
 
     }
+
     public void onPrepared(MediaPlayer player) {
     }
 
+    String mUserLocation = "";
+    private void doOnEmergency() {
+        Intent i = new Intent(SensorActivity.this, VideoCapture.class);
+        Geocoder gcd = new Geocoder(SensorActivity.this, Locale.getDefault());
+        List<Address> geoAddresses = new ArrayList<>();
+        try {
+             geoAddresses = gcd.getFromLocation(LAT, LON, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-    private void doOnEmergency(){
-        Intent i = new Intent(SensorActivity.this,VideoCapture.class);
-        sendSMS("+905058978796","sa");
+        if (geoAddresses.size() > 0) {
+            for (int in = 0; in < 4; in++) { //Since it return only four value we declare this as static.
+                mUserLocation = mUserLocation + geoAddresses.get(0).getAddressLine(in).replace(",", "") + ", ";
+            }
+        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                textt.setText("sa in " + LAT+", "+ LON+" , "+mUserLocation);
+            }
+        });
+        sendSMS("+905058978796", "sa in " + LAT+", "+ LON+" , "+mUserLocation);
         //startActivity(i);
-        File folder = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +"APPCIDENT");
+        File folder = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + "APPCIDENT");
         if (!folder.exists()) {
             folder.mkdirs();
         }
 
         String AudioSavePathInDevice = folder
-                .getAbsolutePath()+"/"+
-                Calendar.getInstance().getTime()+ ".3gp";
+                .getAbsolutePath() + "/" +
+                Calendar.getInstance().getTime() + ".3gp";
 
-        currentPath=AudioSavePathInDevice;
-        mediaRecorder=new MediaRecorder();
+        currentPath = AudioSavePathInDevice;
+        mediaRecorder = new MediaRecorder();
         mediaRecorder.reset();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -300,6 +359,9 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         }
 
     }
+
+
+
     @Override
     public final void onAccuracyChanged(Sensor sensor, int accuracy) {
         // Do something here if sensor accuracy changes.
@@ -314,15 +376,15 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
 
         String name1 = event.sensor.getName();
 
-       // textt.setText(textt.getText() + " " + name1);
+        // textt.setText(textt.getText() + " " + name1);
 
-        switch (sensorType){
+        switch (sensorType) {
             case Sensor.TYPE_PRESSURE:
                 break;
 
             case Sensor.TYPE_AMBIENT_TEMPERATURE:
                 float x = event.values[0];
-                if(x>80){
+                if (x > 80) {
                     emergencyMode();
                 }
                 break;
@@ -349,7 +411,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
 
                 accelerationLast = accelerationCurrent;
 
-                accelerationCurrent = (float)Math.sqrt(Math.pow(X, 2)
+                accelerationCurrent = (float) Math.sqrt(Math.pow(X, 2)
                         + Math.pow(Y, 2)
                         + Math.pow(Z, 2));
 
@@ -361,15 +423,14 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                 float b = event.values[1];
                 float c = event.values[2];
 
-                rootSquare=Math.sqrt(Math.pow(a,2)+Math.pow(b,2)+Math.pow(c,2));
-                if(rootSquare<2.0)
-                {
+                rootSquare = Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2) + Math.pow(c, 2));
+                if (rootSquare < 2.0) {
                     emergencyMode();
                 }
 
 
-                DecimalFormat precision = new DecimalFormat("0,00");// Telefona yüklerken virgül yap
-                double ldAccRound = Double.parseDouble(precision.format(accelerationCurrent));
+               // DecimalFormat precision = new DecimalFormat("0.00");// Telefona yüklerken virgül yap
+                //double ldAccRound = Double.parseDouble(precision.format(accelerationCurrent));
 
 /*
                 if (ldAccRound > 0.3d && ldAccRound < 0.5d) {
@@ -395,13 +456,15 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         // Do something with this sensor data.
     }
 
-    private Uri getOutputMediaFileUri(int type){
+    private Uri getOutputMediaFileUri(int type) {
 
         return Uri.fromFile(getOutputMediaFile(type));
     }
 
-    /** Create a File for saving an image or video */
-    private File getOutputMediaFile(int type){
+    /**
+     * Create a File for saving an image or video
+     */
+    private File getOutputMediaFile(int type) {
 
         // Check that the SDCard is mounted
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
@@ -409,9 +472,9 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
 
 
         // Create the storage directory(MyCameraVideo) if it does not exist
-        if (! mediaStorageDir.exists()){
+        if (!mediaStorageDir.exists()) {
 
-            if (! mediaStorageDir.mkdirs()){
+            if (!mediaStorageDir.mkdirs()) {
 
 
                 output.setText("Failed to create directory MyCameraVideo.");
@@ -428,17 +491,17 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         // Create a media file name
 
         // For unique file name appending current timeStamp with file name
-        java.util.Date date= new java.util.Date();
+        java.util.Date date = new java.util.Date();
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
                 .format(date.getTime());
 
         File mediaFile;
 
-        if(type == MEDIA_TYPE_VIDEO) {
+        if (type == MEDIA_TYPE_VIDEO) {
 
             // For unique video file name appending current timeStamp with file name
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "VID_"+ timeStamp + ".mp4");
+                    "VID_" + timeStamp + ".mp4");
 
         } else {
             return null;
@@ -457,7 +520,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
 
             if (resultCode == RESULT_OK) {
 
-                output.setText("Video File : " +data.getData());
+                output.setText("Video File : " + data.getData());
 
                 // Video captured and saved to fileUri specified in the Intent
                 Toast.makeText(this, "Video saved to:" +
@@ -504,8 +567,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     }
 
 
-
-    protected void emergencyMode () {
+    protected void emergencyMode() {
         /*
         SurfaceView cameraView = (SurfaceView) findViewById(R.id.CameraView);
         holder = cameraView.getHolder();
@@ -515,14 +577,14 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         cameraView.setClickable(true);
         cameraView.setOnClickListener(this);
         */
-        if(!isEmergancyMode){
-            isEmergancyMode=true;
+        if (!isEmergancyMode) {
+            isEmergancyMode = true;
             textt.setText("Düştü");
             AlertDialog.Builder builder1 = new AlertDialog.Builder(SensorActivity.this);
             builder1.setMessage("Is there something wrong?.");
             builder1.setCancelable(false);
 
-            shouldGoIntoEmergencyMode=true;
+            shouldGoIntoEmergencyMode = true;
 
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
             final Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
@@ -533,7 +595,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             dialog.cancel();
-                            shouldGoIntoEmergencyMode=false;
+                            shouldGoIntoEmergencyMode = false;
                             r.stop();
                         }
                     });
@@ -557,19 +619,18 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
 
                     alert11.cancel();
                     r.stop();
-                    if(shouldGoIntoEmergencyMode) {
+                    if (shouldGoIntoEmergencyMode) {
                         doOnEmergency();
 
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(SensorActivity.this,"No response, emergency mode is started",Toast.LENGTH_LONG).show();
+                                Toast.makeText(SensorActivity.this, "No response, emergency mode is started", Toast.LENGTH_LONG).show();
                             }
                         });
 
-                    }
-                    else{
-                        isEmergancyMode=false;
+                    } else {
+                        isEmergancyMode = false;
                     }
                 }
             }, 5000); // the timer will count 5 seconds....
@@ -599,10 +660,30 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
             }*/
 
 
-        }
-        else{
+        } else {
             //shouldGoIntoEmergencyMode=false;
         }
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+    LAT=location.getLatitude();
+    LON=location.getLongitude();
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
 
     }
     /*

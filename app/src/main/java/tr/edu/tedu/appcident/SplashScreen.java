@@ -102,6 +102,10 @@ public class SplashScreen extends AppCompatActivity {
             permissionsNeeded.add("Audio");
         }
 
+        if (!addPermission(permissionsList, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            permissionsNeeded.add("Location");
+        }
+
         if (permissionsList.size() > 0) {
             if (permissionsNeeded.size() > 0) {
                 // Need Rationale
