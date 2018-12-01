@@ -2,6 +2,7 @@ package tr.edu.tedu.appcident;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -26,6 +27,8 @@ import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.FloatMath;
@@ -63,7 +66,7 @@ import java.util.TimerTask;
 
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
-public class SensorActivity extends Activity implements SensorEventListener/*, View.OnClickListener, SurfaceHolder.Callback*/ {
+public class SensorActivity extends AppCompatActivity implements SensorEventListener/*, View.OnClickListener, SurfaceHolder.Callback*/ {
     private static final int INTENTCAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
     private SensorManager mSensorManager;
     private Sensor mPressure;
@@ -126,8 +129,12 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
     @Override
     public final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_ACTION_BAR);
         setContentView(R.layout.activity_sensor);
 
+
+
+        //getSupportActionBar();
         isEmergancyMode=false;
 
 /*
