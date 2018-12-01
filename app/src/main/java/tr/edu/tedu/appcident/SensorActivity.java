@@ -154,7 +154,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         initRecorder();
 */
 
-       /* if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+       if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, 200);
         }
         else{
@@ -162,6 +162,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
             telephonyManager.getDeviceId();
             IMEINumber = telephonyManager.getDeviceId();
         }
+        /*
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 200);
         }
@@ -367,7 +368,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                 }
 
 
-                DecimalFormat precision = new DecimalFormat("0.00");// Telefona yüklerken virgül yap
+                DecimalFormat precision = new DecimalFormat("0,00");// Telefona yüklerken virgül yap
                 double ldAccRound = Double.parseDouble(precision.format(accelerationCurrent));
 
 /*
