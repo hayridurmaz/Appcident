@@ -1,69 +1,271 @@
 package tr.edu.tedu.appcident;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
-import tr.edu.tedu.appcident.R;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static java.lang.Thread.sleep;
 
-public class SplashScreen extends Activity {
+public class SplashScreen extends AppCompatActivity {
 
+    String loginstatus;
+    final private int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 124;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // TODO Auto-generated method stub
         super.onCreate(savedInstanceState);
         setContentView(R.layout.splash_screen);
 
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (Build.VERSION.SDK_INT >= 23) {
+                    // Marshmallow+
+                    permissioncheck();
 
-        try{
-
-            int PERMISSION_ALL = 1;
-            String[] PERMISSIONS = {
-                    android.Manifest.permission.READ_PHONE_STATE,
-                    android.Manifest.permission.CAMERA,
-                    android.Manifest.permission.RECORD_AUDIO,
-                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    android.Manifest.permission.SEND_SMS,
-                    android.Manifest.permission.ACCESS_FINE_LOCATION
-
-            };
-
-            while(!hasPermissions(SplashScreen.this, PERMISSIONS)){
-                ActivityCompat.requestPermissions(SplashScreen.this, PERMISSIONS, PERMISSION_ALL);
-                sleep(3000);
-            }
-        }catch(InterruptedException e){
-            e.printStackTrace();
-        }finally {
-            Intent intent = new Intent(SplashScreen.this, SensorActivity.class);
-            startActivity(intent);
-
-        }
-
-    }
-
-    public static boolean hasPermissions(Context context, String... permissions) {
-        if (context != null && permissions != null) {
-            for (String permission : permissions) {
-                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
-                    return false;
+                } else {
+                    // Pre-Marshmallow
+                    LaunchApp();
                 }
             }
-        }
-        return true;
+        }, 3000);
+
+   /*     Thread background = new Thread() {
+            public void run() {
+
+                try {
+                    // Thread will sleep for 10 seconds
+                    sleep(4*1000);
+
+                    startActivity(new Intent(SplashScreen.this,HomeActivity.class));
+
+
+                    finish();
+
+                } catch (Exception e) {
+
+                }
+            }
+        };
+
+        // start thread
+        background.start();*/
     }
 
+
+
+
+
+//-************************ permission check ***********************************************************************
+
+    private void permissioncheck() {
+        List<String> permissionsNeeded = new ArrayList<String>();
+
+        final List<String> permissionsList = new ArrayList<String>();
+        if (!addPermission(permissionsList, Manifest.permission.READ_EXTERNAL_STORAGE))
+            permissionsNeeded.add("READ");
+        if (!addPermission(permissionsList, Manifest.permission.WRITE_EXTERNAL_STORAGE))
+            permissionsNeeded.add("WRITE");
+
+        if (!addPermission(permissionsList, Manifest.permission.READ_PHONE_STATE)) {
+            permissionsNeeded.add("Phone state");
+        }
+        if (!addPermission(permissionsList, Manifest.permission.CAMERA)) {
+            permissionsNeeded.add("Camera");
+        }
+
+        if (!addPermission(permissionsList, Manifest.permission.SEND_SMS)) {
+            permissionsNeeded.add("Sending sms");
+        }
+
+        if (!addPermission(permissionsList, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            permissionsNeeded.add("Location");
+        }
+        if (!addPermission(permissionsList, Manifest.permission.RECORD_AUDIO)) {
+            permissionsNeeded.add("Audio");
+        }
+
+        if (permissionsList.size() > 0) {
+            if (permissionsNeeded.size() > 0) {
+                // Need Rationale
+                String message = "You need to grant access to " + permissionsNeeded.get(0);
+                for (int i = 1; i < permissionsNeeded.size(); i++)
+                    message = message + ", " + permissionsNeeded.get(i);
+                showMessageOKCancel(message,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                if (Build.VERSION.SDK_INT >= 23) {
+                                    // Marshmallow+
+                                    requestPermissions(permissionsList.toArray(new String[permissionsList.size()]),
+                                            REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
+
+
+                                } else {
+                                    // Pre-Marshmallow
+                                }
+
+                            }
+                        });
+                return;
+            }
+
+            if (Build.VERSION.SDK_INT >= 23) {
+                // Marshmallow+
+                requestPermissions(permissionsList.toArray(new String[permissionsList.size()]),
+                        REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
+
+
+            } else {
+                // Pre-Marshmallow
+
+            }
+
+            return;
+        }else
+        {
+            // Toast.makeText(this,"Permission",Toast.LENGTH_LONG).show();
+            LaunchApp();
+        }
+
+        //insertDummyContact();
+    }
+
+
+    private boolean addPermission(List<String> permissionsList, String permission) {
+
+        Boolean cond;
+        if (Build.VERSION.SDK_INT >= 23) {
+            // Marshmallow+
+            if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                permissionsList.add(permission);
+                // Check for Rationale Option
+                if (!shouldShowRequestPermissionRationale(permission))
+                    //  return false;
+
+                    cond = false;
+            }
+            //  return true;
+
+            cond = true;
+
+
+        } else {
+            // Pre-Marshmallow
+            cond = true;
+        }
+
+        return cond;
+
+    }
+
+    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
+        new AlertDialog.Builder(SplashScreen.this)
+                .setMessage(message)
+                .setPositiveButton("OK", okListener)
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show();
+    }
+
+
     @Override
-    protected void onPause() {
-        // TODO Auto-generated method stub
-        super.onPause();
-        finish();
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        //Checking the request code of our request
+        if (requestCode == 23) {
+
+            //If permission is granted
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                //Displaying a toast
+                Toast.makeText(this, "Permission granted", Toast.LENGTH_LONG).show();
+            } else {
+                //Displaying another toast if permission is not granted
+                Toast.makeText(this, "Permission Needed To Run The App", Toast.LENGTH_LONG).show();
+            }
+        }
+        if (requestCode == REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS) {
+            Map<String, Integer> perms = new HashMap<String, Integer>();
+            // Initial
+            perms.put(Manifest.permission.READ_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED);
+            perms.put(Manifest.permission.WRITE_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED);
+            perms.put(Manifest.permission.CAMERA, PackageManager.PERMISSION_GRANTED);
+            //Toast.makeText(SplashScreen.this, " Permissions are jddddd", Toast.LENGTH_SHORT).show();
+            // Fill with results
+            for (int i = 0; i < permissions.length; i++)
+                perms.put(permissions[i], grantResults[i]);
+            // Check for ACCESS_FINE_LOCATION
+            if (perms.get(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                    && perms.get(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                    perms.get(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                // All Permissions Granted
+                // insertDummyContact();
+
+                //Toast.makeText(SplashScreen.this, " Permissions are l", Toast.LENGTH_SHORT).show();
+                LaunchApp();
+
+            } else {
+                // Permission Denied
+                Toast.makeText(SplashScreen.this, "Some Permission is Denied", Toast.LENGTH_SHORT)
+                        .show();
+
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Do something after 100
+                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                        Uri uri = Uri.fromParts("package", getPackageName(), null);
+                        intent.setData(uri);
+                        startActivityForResult(intent, REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
+                        finish();
+                    }
+                }, 3000);
+            }
+
+        }
+    }
+
+    public void LaunchApp()
+    {
+        Thread background = new Thread() {
+            public void run() {
+
+                try {
+                    // Thread will sleep for 10 seconds
+                    sleep(1*1000);
+
+                    startActivity(new Intent(getApplicationContext(),SensorActivity.class));
+                    finish();
+
+                } catch (Exception e) {
+
+                }
+            }
+        };
+
+        // start thread
+        background.start();
+
+
     }
 }
