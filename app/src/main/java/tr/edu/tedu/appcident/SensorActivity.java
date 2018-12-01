@@ -26,6 +26,7 @@ import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
+import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.FloatMath;
 import android.util.Log;
@@ -117,6 +118,11 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
         return super.onOptionsItemSelected(item);
     }
 
+    private void sendSMS(String phoneNumber, String message) {
+        SmsManager sms = SmsManager.getDefault();
+        sms.sendTextMessage(phoneNumber, null, message, null, null);
+    }
+
     @Override
     public final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -158,7 +164,9 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 200);
         }
-
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, 200);
+        }
 
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -253,6 +261,7 @@ public class SensorActivity extends Activity implements SensorEventListener/*, V
 
     private void doOnEmergency(){
         Intent i = new Intent(SensorActivity.this,VideoCapture.class);
+        sendSMS("+905058978796","sa");
         //startActivity(i);
         File folder = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +"APPCIDENT");
         if (!folder.exists()) {
