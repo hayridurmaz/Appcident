@@ -102,4 +102,37 @@
         android:textColor="@color/colorPrimaryDark"
         tools:text="We cannot get your IMEI. Please make contact with us." />
 
+    <TextView
+        android:id="@+id/RecordTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/seekBar"
+        android:layout_marginBottom="-115dp"
+        android:text="Please chose record time:                   seconds"
+        android:textColor="@color/colorPrimaryDark" />
+
+    <TextView
+        android:id="@+id/Seconds"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/RecordTime"
+        android:layout_centerHorizontal="true"
+        android:text="0"
+        android:textColor="@color/colorPrimaryDark" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/seekBar" />
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="115dp" />
+
 </RelativeLayout>

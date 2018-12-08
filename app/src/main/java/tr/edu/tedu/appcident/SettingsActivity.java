@@ -9,6 +9,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +30,13 @@ public class SettingsActivity extends Activity {
     EditText phoneInput1;
     EditText phoneInput2;
     EditText phoneInput3;
+    User user;
+
+    TextView seconds;
+    SeekBar seekBar;
+    ProgressBar progressBar;
+    int recordSeconds;
+
 
     TextView IMEITextView;
     TextView AddedPhones;
@@ -65,6 +74,32 @@ public class SettingsActivity extends Activity {
         IMEITextView = (TextView)findViewById(R.id.IMEITextView);
         IMEITextView.setText(IMEITextView.getText().toString() + " " + IMEINumber);
 
+
+        progressBar=(ProgressBar) findViewById(R.id.progressBar);
+        seconds=(TextView) findViewById(R.id.Seconds);
+        seekBar=(SeekBar) findViewById(R.id.seekBar);
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+
+                progressBar.setProgress(i);
+                seconds.setText(""+ i +"");
+                recordSeconds=i;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+
         phoneInput1 = (EditText) findViewById(R.id.phoneInput1);
         phoneInput2 = (EditText) findViewById(R.id.phoneInput2);
         phoneInput3 = (EditText) findViewById(R.id.phoneInput3);
@@ -77,7 +112,10 @@ public class SettingsActivity extends Activity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // Get Post object and use the values to update the UI
                 if(dataSnapshot.child(IMEINumber+"").exists()){
-                    AddedPhones.setText("Numbers that you have added: \n-"+dataSnapshot.child(IMEINumber).child("number1").getValue()+"\n-"+dataSnapshot.child(IMEINumber).child("number2").getValue()+"\n-"+dataSnapshot.child(IMEINumber).child("number3").getValue());
+                    //AddedPhones.setText("Numbers that you have added: \n-"+dataSnapshot.child(IMEINumber).child("number1").getValue()+"\n-"+dataSnapshot.child(IMEINumber).child("number2").getValue()+"\n-"+dataSnapshot.child(IMEINumber).child("number3").getValue());
+                    phoneInput1.setText(dataSnapshot.child(IMEINumber).child("number1").getValue().toString());
+                    phoneInput2.setText(dataSnapshot.child(IMEINumber).child("number2").getValue().toString());
+                    phoneInput3.setText(dataSnapshot.child(IMEINumber).child("number3").getValue().toString());
                 }
 
                 // ...
@@ -99,7 +137,9 @@ public class SettingsActivity extends Activity {
                     phoneInput1.setError("Please enter valid number");
                 } else {
                     phoneNumber1 = phoneInput1.getText().toString();
+
                 }
+
                 phoneNumber2 = phoneInput2.getText().toString();
                 if (phoneInput2.getText().length() != 11) {
                     phoneInput2.setError("Please enter valid number");
@@ -114,19 +154,20 @@ public class SettingsActivity extends Activity {
                 }
                 if (phoneNumber3.length() == 11 && phoneNumber2.length() == 11 && phoneNumber1.length() == 11) {
                     showToast("Now your emergency list is ready!!");
-                    User user = new User(phoneNumber1, phoneNumber2, phoneNumber3,IMEINumber);
+
+                    user = new User(phoneNumber1, phoneNumber2, phoneNumber3,IMEINumber);
                     myRef.child(IMEINumber).setValue(user);
+
+
+
                     Intent intent = new Intent(SettingsActivity.this, SensorActivity.class);
                     startActivity(intent);
                 }
 
 
 
-
             }
         });
-
-
     }
 
     public void showToast(String text){
