@@ -15,6 +15,7 @@
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
+    <uses-feature android:name="android.hardware.location.gps" />
 
     <application
         android:allowBackup="true"
@@ -39,10 +40,6 @@
         <activity android:name=".VideoRecorderActivity" />
         <activity android:name=".VideoCapture" />
 
-        <service
-            android:name=".LocationUpdateService"
-            android:enabled="true"
-            android:exported="true"></service>
     </application>
 
 </manifest>

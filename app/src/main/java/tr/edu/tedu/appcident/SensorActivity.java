@@ -16,7 +16,6 @@ import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.CamcorderProfile;
 import android.media.MediaPlayer;
@@ -28,8 +27,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -77,7 +78,7 @@ import java.util.TimerTask;
 
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
-public class SensorActivity extends AppCompatActivity implements SensorEventListener , LocationListener/*, View.OnClickListener, SurfaceHolder.Callback*/ {
+public class SensorActivity extends AppCompatActivity implements SensorEventListener /*, View.OnClickListener, SurfaceHolder.Callback*/ {
     private static final int INTENTCAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
     private SensorManager mSensorManager;
     private Sensor mPressure;
@@ -92,6 +93,8 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     static String currentPath;
 
     private Button start, stop;
+    String mUserLocation = "Cannot find address";
+
 
     private float accelerationCurrent, accelerationLast, acceleration;
 
@@ -109,6 +112,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
 
     public Vibrator v;
     double LAT, LON;
+    int seconds;
 
     TextView output, textt;
     MediaRecorder mediaRecorder = new MediaRecorder();
@@ -118,52 +122,35 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     static DialogInterface currentDialogInterface;
     LocationManager locationManager;
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.toolbar, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.settings) {
-            Intent intent = new Intent(SensorActivity.this, SettingsActivity.class);
-            intent.putExtra("IMEINumber", IMEINumber);
-            startActivity(intent);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Intent intent = new Intent(getApplicationContext(),LocationUpdateService.class);
-        startService(intent);
-    }
-
-    @Override
-    protected void onStop() {
-        Intent intent = new Intent(getApplicationContext(),LocationUpdateService.class);
-        stopService(intent);
-        super.onStop();
-    }
-
-    private void sendSMS(String phoneNumber, String message) {
-        SmsManager sms = SmsManager.getDefault();
-        sms.sendTextMessage(phoneNumber, null, message, null, null);
-    }
-
+    @SuppressLint("MissingPermission")
     @Override
     public final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_ACTION_BAR);
         setContentView(R.layout.activity_sensor);
 
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+        //locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+        //Intent intent = new Intent(SensorActivity.this,LocationUpdateService.class);
+        //startService(intent);
 
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(SensorActivity.this);
+
+
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(SensorActivity.this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            Log.e("LOCATION",location.toString());
+                            LAT=location.getLatitude();
+                            LON=location.getLongitude();
+                            currentAddress=getCompleteAddress(LAT,LON);
+                        }
+                    }
+                });
 
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -220,8 +207,21 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         }*/
 
 
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("Users").child("User1");
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("Users").child(IMEINumber);
+
+        myRef.child("recordTime").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                seconds=Integer.parseInt(dataSnapshot.getValue().toString());
+                Log.d("dataSnapshot.child: ",dataSnapshot.getValue().toString());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
         start = (Button) findViewById(R.id.start);
         stop = (Button) findViewById(R.id.stop);
@@ -303,33 +303,77 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.toolbar, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.settings) {
+            Intent intent = new Intent(SensorActivity.this, SettingsActivity.class);
+            intent.putExtra("IMEINumber", IMEINumber);
+            startActivity(intent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
+
+    @Override
+    protected void onStop() {
+        //Intent intent = new Intent(SensorActivity.this,LocationUpdateService.class);
+        //stopService(intent);
+        super.onStop();
+    }
+
+    private void sendSMS(String phoneNumber, String message) {
+        SmsManager sms = SmsManager.getDefault();
+        sms.sendTextMessage(phoneNumber, null, message, null, null);
+    }
+
+
+
     public void onPrepared(MediaPlayer player) {
     }
 
-    String mUserLocation = "";
     private void doOnEmergency() {
         Intent i = new Intent(SensorActivity.this, VideoCapture.class);
-        Geocoder gcd = new Geocoder(SensorActivity.this, Locale.getDefault());
+        //startActivity(i);
+        Geocoder gcd = new Geocoder(getApplicationContext(), Locale.getDefault());
         List<Address> geoAddresses = new ArrayList<>();
-        try {
-             geoAddresses = gcd.getFromLocation(LAT, LON, 1);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (geoAddresses.size() > 0) {
-            for (int in = 0; in < 4; in++) { //Since it return only four value we declare this as static.
-                mUserLocation = mUserLocation + geoAddresses.get(0).getAddressLine(in).replace(",", "") + ", ";
-            }
-        }
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                textt.setText("sa in " + LAT+", "+ LON+" , "+mUserLocation);
+                textt.setText("We send an sms to your friends: \"Your friend may be in trouble in  " + LAT+", "+ LON+" , "+currentAddress+"\"");
             }
         });
-        sendSMS("+905058978796", "sa in " + LAT+", "+ LON+" , "+mUserLocation);
-        //startActivity(i);
+        /*try {
+            geoAddresses = gcd.getFromLocation(LAT, LON, 1);
+            if (geoAddresses.size() > 0) {
+                for (int in = 0; in < 4; in++) { //Since it return only four value we declare this as static.
+                    // mUserLocation = mUserLocation + geoAddresses.get(0).getAddressLine(in).replace(",", "") + ", ";
+                }
+            }
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    textt.setText("sa in " + LAT+", "+ LON+" , "+mUserLocation);
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+
+
+        sendSMS("+905058978796", "Your friend may be in trouble in " + LAT+", "+ LON+" , "+currentAddress);
         File folder = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + "APPCIDENT");
         if (!folder.exists()) {
             folder.mkdirs();
@@ -349,6 +393,19 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         try {
             mediaRecorder.prepare();
             mediaRecorder.start();
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    final Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            stop.performClick();
+                        }
+                    }, seconds*1000);
+                }
+            });
         } catch (IllegalStateException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -361,6 +418,44 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     }
 
 
+
+    public String getCompleteAddress(double latitude, double longitude) {
+        String location = "";
+        try {
+            Geocoder geocoder = new Geocoder(SensorActivity.this, Locale.getDefault());
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            if (addresses.size() > 0) {
+                Address address = addresses.get(0);
+                String state, city, zip, street;
+                if (address.getAdminArea() != null) {
+                    state = address.getAdminArea();
+                } else {
+                    state = "";
+                }
+                if (address.getLocality() != null) {
+                    city = address.getLocality();
+                } else {
+                    city = "";
+                }
+                if (address.getPostalCode() != null) {
+                    zip = address.getPostalCode();
+                } else {
+                    zip = "";
+                }
+
+                if (address.getThoroughfare() != null) {
+                    street = address.getSubLocality() + "," + address.getThoroughfare();
+                } else {
+                    street = address.getSubLocality() + "," + address.getFeatureName();
+                }
+                location = street + "," + city + "," + zip + "," + state;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Log.d("LOCATION:",location);
+        return location;
+    }
 
     @Override
     public final void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -550,6 +645,9 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         // Register a listener for the sensor.
         super.onResume();
 
+       // Intent intent = new Intent(SensorActivity.this,LocationUpdateService.class);
+        //startService(intent);
+
         mSensorManager.registerListener(this, mPressure, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mAcceleration, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mHeat, SensorManager.SENSOR_DELAY_NORMAL);
@@ -563,6 +661,10 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     protected void onPause() {
         // Be sure to unregister the sensor when the activity pauses.
         super.onPause();
+
+       // Intent intent = new Intent(SensorActivity.this,LocationUpdateService.class);
+        //stopService(intent);
+
         mSensorManager.unregisterListener(this);
     }
 
@@ -665,11 +767,20 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         }
 
     }
-
+/*
     @Override
     public void onLocationChanged(Location location) {
-    LAT=location.getLatitude();
-    LON=location.getLongitude();
+        if(location!=null){
+            Log.w("location.getLatitude",location.getLatitude()+"");
+            Log.v("location.getLongitude",location.getLongitude()+"");
+            Log.v("location.mUserLocation",getCompleteAddress(LAT,LON));
+            if(location.getLatitude()!=0 &&location.getLongitude()!=0){
+                LAT=location.getLatitude();
+                LON=location.getLongitude();
+                mUserLocation=getCompleteAddress(LAT,LON);
+            }
+        }
+
     }
 
     @Override
@@ -685,7 +796,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     @Override
     public void onProviderDisabled(String provider) {
 
-    }
+    }*/
     /*
 
     private void initRecorder() {
