@@ -4,17 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/app_background_1">
+    android:background="@drawable/app_background_1"
+    android:layout_gravity="center">
 
 
 
     <TextView
         android:id="@+id/label_light"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text=""
-        android:textColor="@color/colorPrimaryDark"
-        app:layout_constraintStart_toStartOf="parent"
+        android:text="@string/everything_s_okay"
+        android:background="@android:color/black"
+        android:gravity="center"
+        android:textColor="@android:color/white"
         app:layout_constraintTop_toTopOf="parent" />
 
 

@@ -681,7 +681,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         */
         if (!isEmergancyMode) {
             isEmergancyMode = true;
-            textt.setText("Düştü");
+            textt.setText("Something's wrong?");
             AlertDialog.Builder builder1 = new AlertDialog.Builder(SensorActivity.this);
             builder1.setMessage("Is there something wrong?.");
             builder1.setCancelable(false);
@@ -697,6 +697,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             dialog.cancel();
+                            textt.setText("Everything's okay!");
                             shouldGoIntoEmergencyMode = false;
                             r.stop();
                         }
