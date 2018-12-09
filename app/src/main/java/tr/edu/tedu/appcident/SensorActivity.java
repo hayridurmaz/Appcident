@@ -52,6 +52,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -129,6 +132,29 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         requestWindowFeature(Window.FEATURE_ACTION_BAR);
         setContentView(R.layout.activity_sensor);
 
+
+        /*LocationRequest mLocationRequest = LocationRequest.create();
+        mLocationRequest.setInterval(60000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        LocationCallback mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
+                for (Location location : locationResult.getLocations()) {
+                    if (location != null) {
+                        Log.e("NOTNULLLOCC",location.toString());
+                        LAT=location.getLatitude();
+                        LON=location.getLongitude();
+                        currentAddress=getCompleteAddress(LAT,LON);
+                    }
+                }
+            }
+        };
+        LocationServices.getFusedLocationProviderClient(SensorActivity.this).requestLocationUpdates(mLocationRequest, mLocationCallback, null);*/
+
         //locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
         //Intent intent = new Intent(SensorActivity.this,LocationUpdateService.class);
@@ -143,11 +169,15 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                     @Override
                     public void onSuccess(Location location) {
                         // Got last known location. In some rare situations this can be null.
+                        Log.e(" GELDİ AMA NULL","olabilir");
                         if (location != null) {
                             Log.e("LOCATION",location.toString());
                             LAT=location.getLatitude();
                             LON=location.getLongitude();
                             currentAddress=getCompleteAddress(LAT,LON);
+                        }
+                        else{
+                            currentAddress="We could not determine address.";
                         }
                     }
                 });
@@ -321,6 +351,8 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         return super.onOptionsItemSelected(item);
     }
 
+
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -345,6 +377,23 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     }
 
     private void doOnEmergency() {
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(SensorActivity.this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        Log.e(" GELDİ AMA NULL","olabilir");
+                        if (location != null) {
+                            Log.e("LOCATION",location.toString());
+                            LAT=location.getLatitude();
+                            LON=location.getLongitude();
+                            currentAddress=getCompleteAddress(LAT,LON);
+                        }
+                        else{
+                            currentAddress="We could not determine address.";
+                        }
+                    }
+                });
         Intent i = new Intent(SensorActivity.this, VideoCapture.class);
         //startActivity(i);
         Geocoder gcd = new Geocoder(getApplicationContext(), Locale.getDefault());
@@ -640,10 +689,29 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         }
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     protected void onResume() {
         // Register a listener for the sensor.
         super.onResume();
+
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(SensorActivity.this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        Log.e(" GELDİ AMA NULL","olabilir");
+                        if (location != null) {
+                            Log.e("LOCATION",location.toString());
+                            LAT=location.getLatitude();
+                            LON=location.getLongitude();
+                            currentAddress=getCompleteAddress(LAT,LON);
+                        }
+                        else{
+                            currentAddress="We could not determine address.";
+                        }
+                    }
+                });
 
        // Intent intent = new Intent(SensorActivity.this,LocationUpdateService.class);
         //startService(intent);
