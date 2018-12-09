@@ -79,6 +79,12 @@ public class SettingsActivity extends Activity {
         seconds=(TextView) findViewById(R.id.Seconds);
         seekBar=(SeekBar) findViewById(R.id.seekBar);
 
+
+
+
+            progressBar.setProgress(50);
+            seconds.setText("50");
+
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -100,12 +106,14 @@ public class SettingsActivity extends Activity {
         });
 
 
+
         phoneInput1 = (EditText) findViewById(R.id.phoneInput1);
         phoneInput2 = (EditText) findViewById(R.id.phoneInput2);
         phoneInput3 = (EditText) findViewById(R.id.phoneInput3);
 
         submitButton = (Button) findViewById(R.id.submit);
         AddedPhones=(TextView) findViewById(R.id.addedPhones);
+
 
         ValueEventListener postListener = new ValueEventListener() {
             @Override
@@ -116,6 +124,10 @@ public class SettingsActivity extends Activity {
                     phoneInput1.setText(dataSnapshot.child(IMEINumber).child("number1").getValue().toString());
                     phoneInput2.setText(dataSnapshot.child(IMEINumber).child("number2").getValue().toString());
                     phoneInput3.setText(dataSnapshot.child(IMEINumber).child("number3").getValue().toString());
+                    seconds.setText(dataSnapshot.child(IMEINumber).child("recordTime").getValue().toString());
+                    progressBar.setProgress(Integer.parseInt(dataSnapshot.child(IMEINumber).child("recordTime").getValue().toString()));
+                    user = new User(dataSnapshot.child(IMEINumber).child("number1").getValue().toString(), dataSnapshot.child(IMEINumber).child("number2").getValue().toString(), dataSnapshot.child(IMEINumber).child("number3").getValue().toString(),IMEINumber,progressBar.getProgress());
+                    //myRef.child(IMEINumber).setValue(user);
                 }
 
                 // ...
@@ -155,7 +167,7 @@ public class SettingsActivity extends Activity {
                 if (phoneNumber3.length() == 11 && phoneNumber2.length() == 11 && phoneNumber1.length() == 11) {
                     showToast("Now your emergency list is ready!!");
 
-                    user = new User(phoneNumber1, phoneNumber2, phoneNumber3,IMEINumber);
+                    user = new User(phoneNumber1, phoneNumber2, phoneNumber3,IMEINumber,progressBar.getProgress());
                     myRef.child(IMEINumber).setValue(user);
 
 
