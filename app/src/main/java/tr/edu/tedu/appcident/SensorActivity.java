@@ -248,7 +248,9 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                     Log.d("dataSnapshot.child: ",dataSnapshot.getValue().toString());
                 }
                 else {
-                    seconds=5;
+                    Intent intent = new Intent(SensorActivity.this, SettingsActivity.class);
+                    intent.putExtra("IMEINumber", IMEINumber);
+                    startActivity(intent);
                 }
 
             }
