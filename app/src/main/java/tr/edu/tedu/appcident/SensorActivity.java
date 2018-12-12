@@ -2,42 +2,34 @@ package tr.edu.tedu.appcident;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
-import android.location.Location;
 import android.location.LocationManager;
-import android.media.CamcorderProfile;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Vibrator;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
-import android.util.FloatMath;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -46,31 +38,25 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/*
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.*;
+*/
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.w3c.dom.Text;
-
-import java.io.Console;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.Time;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -81,7 +67,7 @@ import java.util.TimerTask;
 
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
-public class SensorActivity extends AppCompatActivity implements SensorEventListener /*, View.OnClickListener, SurfaceHolder.Callback*/ {
+public class SensorActivity extends AppCompatActivity implements SensorEventListener, SurfaceHolder.Callback /*, View.OnClickListener, SurfaceHolder.Callback*/ {
     private static final int INTENTCAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
     private SensorManager mSensorManager;
     private Sensor mPressure;
@@ -95,7 +81,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     private static String IMEINumber;
     static String currentPath;
 
-    private Button start, stop;
+    private Button start, stop, startService;
     String mUserLocation = "Cannot find address";
 
 
@@ -120,10 +106,16 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     TextView output, textt;
     MediaRecorder mediaRecorder = new MediaRecorder();
 
-    private FusedLocationProviderClient mFusedLocationClient;
+    //private FusedLocationProviderClient mFusedLocationClient;
     String currentAddress;
     static DialogInterface currentDialogInterface;
     LocationManager locationManager;
+
+    private static final String TAG = "Recorder";
+    public static SurfaceView mSurfaceView;
+    public static SurfaceHolder mSurfaceHolder;
+    public static Camera mCamera ;
+    public static boolean mPreviewRunning;
 
     @SuppressLint("MissingPermission")
     @Override
@@ -159,7 +151,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
         //Intent intent = new Intent(SensorActivity.this,LocationUpdateService.class);
         //startService(intent);
-
+/*
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(SensorActivity.this);
 
@@ -222,6 +214,10 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
             telephonyManager.getDeviceId();
             IMEINumber = telephonyManager.getDeviceId();
         }
+
+        if (IMEINumber == null) {
+            IMEINumber = "1";
+        }
         /*
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 200);
@@ -241,10 +237,17 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         DatabaseReference myRef = database.getReference("Users").child(IMEINumber);
 
         myRef.child("recordTime").addValueEventListener(new ValueEventListener() {
+
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                seconds=Integer.parseInt(dataSnapshot.getValue().toString());
-                Log.d("dataSnapshot.child: ",dataSnapshot.getValue().toString());
+                if (dataSnapshot.getValue() != null){
+                    seconds=Integer.parseInt(dataSnapshot.getValue().toString());
+                    Log.d("dataSnapshot.child: ",dataSnapshot.getValue().toString());
+                }
+                else {
+                    seconds=5;
+                }
+
             }
 
             @Override
@@ -253,8 +256,15 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
             }
         });
 
+        mSurfaceView = (SurfaceView) findViewById(R.id.surfaceView);
+        mSurfaceView.setVisibility(View.INVISIBLE);
+        mSurfaceHolder = mSurfaceView.getHolder();
+        mSurfaceHolder.addCallback(this);
+        mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+
         start = (Button) findViewById(R.id.start);
         stop = (Button) findViewById(R.id.stop);
+        startService = (Button)findViewById(R.id.buttonService);
 
         output = (TextView) findViewById(R.id.label_light);
 
@@ -271,7 +281,6 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         acceleration = 0.0f;
 
         textt = (TextView) findViewById(R.id.label_light);
-
 
         start.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -298,6 +307,13 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         stop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                mSurfaceView.setVisibility(View.INVISIBLE);
+                start.setVisibility(View.VISIBLE);
+                stop.setVisibility(View.VISIBLE);
+                startService.setVisibility(View.VISIBLE);
+
+                stopService(new Intent(getApplicationContext(), CameraService.class));
 
 
                 try {
@@ -329,6 +345,20 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
 
             }
         });
+
+        startService.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startService(new Intent(getApplicationContext(), BackService.class));
+            }
+        });
+
+        if (getIntent().getExtras() != null)
+            Log.v("Sıkıntı", getIntent().getExtras().getString("isBacked1"));
+
+        if (getIntent().getExtras() != null && getIntent().getExtras().getString("isBacked1").equals("trueee")){
+            start.performClick();
+        }
 
 
     }
@@ -377,6 +407,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     }
 
     private void doOnEmergency() {
+        /*
         mFusedLocationClient.getLastLocation()
                 .addOnSuccessListener(SensorActivity.this, new OnSuccessListener<Location>() {
                     @Override
@@ -394,8 +425,22 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                         }
                     }
                 });
-        Intent i = new Intent(SensorActivity.this, VideoCapture.class);
-        //startActivity(i);
+                */
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+
+        Runnable myRunnable = new Runnable() {
+            @Override
+            public void run() {
+                startService(new Intent(getApplicationContext(), CameraService.class));
+
+                mSurfaceView.setVisibility(View.VISIBLE);
+                start.setVisibility(View.INVISIBLE);
+                stop.setVisibility(View.INVISIBLE);
+                startService.setVisibility(View.INVISIBLE);
+            }
+        };
+        mainHandler.post(myRunnable);
+
         Geocoder gcd = new Geocoder(getApplicationContext(), Locale.getDefault());
         List<Address> geoAddresses = new ArrayList<>();
         runOnUiThread(new Runnable() {
@@ -404,6 +449,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                 textt.setText("We send an sms to your friends: \"Your friend may be in trouble in  " + LAT+", "+ LON+" , "+currentAddress+"\"");
             }
         });
+
         /*try {
             geoAddresses = gcd.getFromLocation(LAT, LON, 1);
             if (geoAddresses.size() > 0) {
@@ -432,6 +478,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                 .getAbsolutePath() + "/" +
                 Calendar.getInstance().getTime() + ".3gp";
 
+        /*
         currentPath = AudioSavePathInDevice;
         mediaRecorder = new MediaRecorder();
         mediaRecorder.reset();
@@ -439,9 +486,10 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
         mediaRecorder.setOutputFile(AudioSavePathInDevice);
+        */
         try {
-            mediaRecorder.prepare();
-            mediaRecorder.start();
+            //mediaRecorder.prepare();
+            //mediaRecorder.start();
 
             runOnUiThread(new Runnable() {
                 @Override
@@ -458,11 +506,8 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         } catch (IllegalStateException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-
-            e.printStackTrace();
         }
+
 
     }
 
@@ -506,35 +551,37 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         return location;
     }
 
-    @Override
-    public final void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Do something here if sensor accuracy changes.
-    }
+       @Override
+       public final void onAccuracyChanged(Sensor sensor, int accuracy) {
+           // Do something here if sensor accuracy changes.
+       }
 
-    @SuppressLint("StringFormatInvalid")
-    @Override
-    public final void onSensorChanged(SensorEvent event) {
-        float currentValue = event.values[0];
+       @SuppressLint("StringFormatInvalid")
+       @Override
+       public final void onSensorChanged(SensorEvent event) {
+           float currentValue = event.values[0];
 
-        int sensorType = event.sensor.getType();
+           int sensorType = event.sensor.getType();
 
-        String name1 = event.sensor.getName();
+           String name1 = event.sensor.getName();
 
-        // textt.setText(textt.getText() + " " + name1);
+           // textt.setText(textt.getText() + " " + name1);
 
-        switch (sensorType) {
-            case Sensor.TYPE_PRESSURE:
-                break;
+           switch (sensorType) {
+               case Sensor.TYPE_PRESSURE:
+                   break;
 
-            case Sensor.TYPE_AMBIENT_TEMPERATURE:
-                float x = event.values[0];
-                if (x > 80) {
-                    emergencyMode();
-                }
-                break;
+               case Sensor.TYPE_AMBIENT_TEMPERATURE:
+                   float x = event.values[0];
+                   if (x > 80) {
+                       emergencyMode();
+                   }
+                   break;
 
-            case Sensor.TYPE_ACCELEROMETER:
-                /*String name1 = event.sensor.getName();
+               case Sensor.TYPE_ACCELEROMETER:
+
+                /*
+                String name1 = event.sensor.getName();
                 TextView textt = (TextView) findViewById(R.id.label_light);
                 textt.setText(textt.getText() + " " + name1);
 
@@ -549,6 +596,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                 if ((deltaX > vibrateThreshold) || (deltaY > 9.81f) || (deltaZ > vibrateThreshold)) {
                 // textt.setText("Oluyor mu acaba???");
             }*/
+
                 float X = event.values[0];
                 float Y = event.values[1];
                 float Z = event.values[2];
@@ -585,6 +633,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                     emergencyMode();
                 }
 */
+
                 break;
 
             case Sensor.TYPE_GYROSCOPE:
@@ -694,7 +743,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     protected void onResume() {
         // Register a listener for the sensor.
         super.onResume();
-
+/*
         mFusedLocationClient.getLastLocation()
                 .addOnSuccessListener(SensorActivity.this, new OnSuccessListener<Location>() {
                     @Override
@@ -712,6 +761,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                         }
                     }
                 });
+*/
 
        // Intent intent = new Intent(SensorActivity.this,LocationUpdateService.class);
         //startService(intent);
@@ -805,7 +855,6 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                     }
                 }
             }, 5000); // the timer will count 5 seconds....
-
 
 
            /* if(shouldGoIntoEmergencyMode) {
@@ -907,15 +956,21 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
             recorder.start();
         }
     }
-
+*/
     public void surfaceCreated(SurfaceHolder holder) {
-        prepareRecorder();
+
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        // TODO Auto-generated method stub
+
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int width,
                                int height) {
     }
-
+/*
     public void surfaceDestroyed(SurfaceHolder holder) {
         if (recording) {
             recorder.stop();

@@ -37,9 +37,15 @@
             android:name=".SensorActivity"
             android:theme="@style/AppTheme" />
         <activity android:name=".SettingsActivity" />
-        <activity android:name=".VideoRecorderActivity" />
+
+        <service android:name=".BackService" />
+
         <activity android:name=".VideoCapture" />
 
+        <service
+            android:name=".CameraService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>
