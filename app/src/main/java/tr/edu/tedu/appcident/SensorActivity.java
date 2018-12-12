@@ -128,7 +128,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         setContentView(R.layout.activity_sensor);
 
 
-        /*LocationRequest mLocationRequest = LocationRequest.create();
+        LocationRequest mLocationRequest = LocationRequest.create();
         mLocationRequest.setInterval(60000);
         mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -148,7 +148,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                 }
             }
         };
-        LocationServices.getFusedLocationProviderClient(SensorActivity.this).requestLocationUpdates(mLocationRequest, mLocationCallback, null);*/
+        LocationServices.getFusedLocationProviderClient(SensorActivity.this).requestLocationUpdates(mLocationRequest, mLocationCallback, null);
 
         //locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
@@ -501,7 +501,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            stop.performClick();
+                            doOnStoppingEmergency();
                         }
                     }, seconds*1000);
                 }
@@ -514,6 +514,10 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
 
     }
 
+
+    public void doOnStoppingEmergency(){
+        stop.performClick();
+    }
 
 
     public String getCompleteAddress(double latitude, double longitude) {
