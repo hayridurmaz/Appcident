@@ -13,6 +13,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -42,13 +43,15 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-/*
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.*;
-*/
+
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -106,7 +109,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     TextView output, textt;
     MediaRecorder mediaRecorder = new MediaRecorder();
 
-    //private FusedLocationProviderClient mFusedLocationClient;
+    private FusedLocationProviderClient mFusedLocationClient;
     String currentAddress;
     static DialogInterface currentDialogInterface;
     LocationManager locationManager;
@@ -151,7 +154,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
         //Intent intent = new Intent(SensorActivity.this,LocationUpdateService.class);
         //startService(intent);
-/*
+
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(SensorActivity.this);
 
@@ -407,7 +410,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     }
 
     private void doOnEmergency() {
-        /*
+
         mFusedLocationClient.getLastLocation()
                 .addOnSuccessListener(SensorActivity.this, new OnSuccessListener<Location>() {
                     @Override
@@ -425,7 +428,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                         }
                     }
                 });
-                */
+
         Handler mainHandler = new Handler(Looper.getMainLooper());
 
         Runnable myRunnable = new Runnable() {
