@@ -979,6 +979,25 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     public void surfaceChanged(SurfaceHolder holder, int format, int width,
                                int height) {
     }
+
+
+
+        public void getInfo(View view) {
+            AlertDialog.Builder builder1 = new AlertDialog.Builder(SensorActivity.this);
+            builder1.setMessage("This app is prepared to help you in moments of accident and emergency. Please make sure you have adjusted your settings correctly before you start using the appcident.");
+            builder1.setCancelable(true);
+
+            builder1.setPositiveButton(
+                    "Understand!",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            AlertDialog alert11 = builder1.create();
+            alert11.show();
+        }
+
 /*
     public void surfaceDestroyed(SurfaceHolder holder) {
         if (recording) {
