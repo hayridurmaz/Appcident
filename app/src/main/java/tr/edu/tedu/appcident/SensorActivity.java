@@ -128,6 +128,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         setContentView(R.layout.activity_sensor);
 
 
+
         LocationRequest mLocationRequest = LocationRequest.create();
         mLocationRequest.setInterval(60000);
         mLocationRequest.setFastestInterval(5000);
@@ -271,6 +272,8 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         stop = (Button) findViewById(R.id.stop);
         startService = (Button)findViewById(R.id.buttonService);
 
+
+
         output = (TextView) findViewById(R.id.label_light);
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -357,6 +360,9 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                 startService(new Intent(getApplicationContext(), BackService.class));
             }
         });
+
+        startService.performClick();
+
 
         if (getIntent().getExtras() != null)
             Log.v("Sıkıntı", getIntent().getExtras().getString("isBacked1"));
@@ -826,6 +832,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                             dialog.cancel();
                             textt.setText("Everything's okay!");
                             shouldGoIntoEmergencyMode = false;
+                            isEmergancyMode=false;
                             r.stop();
                         }
                     });
@@ -863,7 +870,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                         isEmergancyMode = false;
                     }
                 }
-            }, 5000); // the timer will count 5 seconds....
+            }, 20000); // the timer will count 5 seconds....
 
 
            /* if(shouldGoIntoEmergencyMode) {

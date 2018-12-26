@@ -88,7 +88,7 @@ public class BackService extends Service implements SensorEventListener {
 
             case Sensor.TYPE_AMBIENT_TEMPERATURE:
                 float x = event.values[0];
-                if (x > 80) {
+                if (x > 60) {
                     Intent i = new Intent();
                     i.setAction(Intent.ACTION_VIEW);
                     i.setClassName("tr.edu.tedu.appcident",
