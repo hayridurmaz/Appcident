@@ -31,6 +31,16 @@ public class BackService extends Service implements SensorEventListener {
 
     private double rootSquare = 0;
 
+    public float[] accData1;
+    public float[] accData2;
+    public float[] accData3;
+    public long startListenTime = 0;
+    public long currentListenTime = 0;
+    public int currSeconds = 0;
+    public int secondSent = -1;
+
+    public boolean ppp = false;
+
     private float accelerationCurrent, accelerationLast, acceleration;
 
     @Override
@@ -54,6 +64,10 @@ public class BackService extends Service implements SensorEventListener {
         accelerationCurrent = SensorManager.GRAVITY_EARTH;
         accelerationLast = SensorManager.GRAVITY_EARTH;
         acceleration = 0.0f;
+
+        accData1 = new float[60];
+        accData2 = new float[60];
+        accData3 = new float[60];
 
         super.onCreate();
 
@@ -133,17 +147,27 @@ public class BackService extends Service implements SensorEventListener {
                 float b = event.values[1];
                 float c = event.values[2];
 
-                rootSquare = Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2) + Math.pow(c, 2));
-                if (rootSquare < 2.0) {
-                    Intent i = new Intent();
-                    i.setAction(Intent.ACTION_VIEW);
-                    i.setClassName("tr.edu.tedu.appcident",
-                            "tr.edu.tedu.appcident.SensorActivity");
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    i.putExtra("isBacked", true);
-                    i.putExtra("isBacked1", "trueee");
+                //Checking 30secs
+                if (ppp){
+                    if (startListenTime == 0.0f){
+                        startListenTime = System.currentTimeMillis();
+                    }
+                    currentListenTime = System.currentTimeMillis() - startListenTime;
 
-                    startActivity(i);
+
+
+                    if ((int)(currentListenTime / 1000) == secondSent + 1){
+                        //Toast.makeText(BackService.this, (int)(currentListenTime / 1000) + "!!!" + secondSent, Toast.LENGTH_LONG).show();
+                        secondSent++;
+
+                        accelerometerData(a, b, c);
+                    }
+                }
+
+                rootSquare = Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2) + Math.pow(c, 2));
+                if (rootSquare < 2.0 && !ppp) {
+                    ppp = true;
+                    Toast.makeText(BackService.this, "KOYDUK", Toast.LENGTH_LONG).show();
                 }
 
 
@@ -174,6 +198,48 @@ public class BackService extends Service implements SensorEventListener {
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+    public void accelerometerData (float a, float b, float c){
+        accData1[secondSent] = a;
+        accData2[secondSent] = b;
+        accData3[secondSent] = c;
+        boolean isOK = true;
+        boolean finn = false;
+
+        if (secondSent > 0){
+            if (accData1[secondSent - 1] == a){
+                if (accData2[secondSent - 1] == b){
+                    if (accData3[secondSent - 1] == c){
+                        isOK = false;
+                    }
+                }
+            }
+        }
+
+        if (!isOK){
+            finn = true;
+        }
+        if (finn && isOK){
+            ppp = false;
+            secondSent = -1;
+            startListenTime = 0;
+            return;
+        }
+
+        if (secondSent == 10){
+
+            Intent i = new Intent();
+            i.setAction(Intent.ACTION_VIEW);
+            i.setClassName("tr.edu.tedu.appcident",
+                    "tr.edu.tedu.appcident.SensorActivity");
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            i.putExtra("isBacked", true);
+            i.putExtra("isBacked1", "trueee");
+
+            startActivity(i);
+        }
 
     }
 }
