@@ -1,5 +1,7 @@
 package tr.edu.tedu.appcident;
+import java.io.File;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
 import android.app.Service;
 import android.content.Intent;
@@ -90,7 +92,15 @@ public class CameraService extends Service {
             mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
             mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
-            mMediaRecorder.setOutputFile("/sdcard/video.mp4");
+            File folder = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + "APPCIDENT");
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+
+            String videoPathAndName = folder
+                    .getAbsolutePath() + "/" +
+                    Calendar.getInstance().getTime() + ".mp4";
+            mMediaRecorder.setOutputFile(videoPathAndName);
             mMediaRecorder.setVideoFrameRate(30);
             mMediaRecorder.setVideoSize(mPreviewSize.width, mPreviewSize.height);
             mMediaRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());

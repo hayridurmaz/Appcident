@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".SettingsActivity"
-    android:background="@drawable/app_background_2"
+    android:background="#4e4e4b"
     android:theme="@style/Theme.AppCompat">
 
 
@@ -22,17 +22,19 @@
             android:id="@+id/textView2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/colorPrimaryDark"
-            android:text="@string/please_enter_3_phone_numbers_to_call_in_case_of_emergency" />
+            android:textColor="#6bc33a"
+            android:text="@string/please_enter_3_phone_numbers_to_call_in_case_of_emergency"
+            />
 
         <EditText
             android:id="@+id/phoneInput1"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:background="@drawable/border"
+            android:background="@drawable/background"
+            android:drawableRight="@drawable/person"
             android:textColorHint="@color/colorPrimaryDark"
             android:ems="10"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="#6bc33a"
             android:hint="@string/phone_number"
             android:inputType="phone" />
 
@@ -40,32 +42,35 @@
             android:id="@+id/phoneInput2"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:background="@drawable/border"
             android:ems="10"
+            android:drawableRight="@drawable/person"
             android:hint="@string/phone_number"
+            android:background="@drawable/background"
             android:textColorHint="@color/colorPrimaryDark"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="#6bc33a"
             android:inputType="phone" />
 
         <EditText
             android:id="@+id/phoneInput3"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:background="@drawable/border"
+            android:background="@drawable/background"
+            android:drawableRight="@drawable/person"
             android:ems="10"
             android:hint="@string/phone_number"
             android:textColorHint="@color/colorPrimaryDark"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="#6bc33a"
             android:inputType="phone" />
 
         <Button
             android:id="@+id/submit"
             android:layout_width="150dp"
+            android:text="Save"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="110dp"
-            android:background="#d2d2d2"
-            android:text="@string/submit"
-            android:textColor="#000000" />
+            android:background="#4e4e4b"
+            android:drawableRight="@drawable/save"
+            android:textColor="#6bc33a" />
 
         <TextView
             android:id="@+id/textView"
@@ -73,7 +78,7 @@
             android:layout_height="wrap_content"
             android:text="@string/these_phone_numbers_will_be_called_when_the_appcident_decide_you_re_in_danger"
             android:textStyle="italic"
-            android:textColor="#3F4312"
+            android:textColor="#6bc33a"
             android:background="@android:color/transparent"
             android:textSize="18dp" />
     </LinearLayout>
@@ -87,7 +92,7 @@
         android:layout_marginTop="14dp"
         android:text="@string/your_imei"
         android:textSize="18sp"
-        android:textColor="@color/colorPrimaryDark"
+        android:textColor="#6bc33a"
         android:textStyle="bold" />
 
     <TextView
@@ -99,7 +104,7 @@
         android:layout_marginStart="29dp"
         android:layout_marginTop="11dp"
         android:text=""
-        android:textColor="@color/colorPrimaryDark"
+        android:textColor="#6bc33a"
         tools:text="We cannot get your IMEI. Please make contact with us." />
 
     <TextView
@@ -109,7 +114,7 @@
         android:layout_above="@+id/seekBar"
         android:layout_marginBottom="-115dp"
         android:text="Please chose record time:                   seconds"
-        android:textColor="@color/colorPrimaryDark" />
+        android:textColor="#6bc33a"/>
 
     <TextView
         android:id="@+id/Seconds"
@@ -118,7 +123,7 @@
         android:layout_alignTop="@+id/RecordTime"
         android:layout_centerHorizontal="true"
         android:text="0"
-        android:textColor="@color/colorPrimaryDark" />
+        android:textColor="#6bc33a" />
 
     <ProgressBar
         android:id="@+id/progressBar"

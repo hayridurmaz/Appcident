@@ -13,6 +13,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -42,13 +43,12 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-/*
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.*;
-*/
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -106,7 +106,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     TextView output, textt;
     MediaRecorder mediaRecorder = new MediaRecorder();
 
-    //private FusedLocationProviderClient mFusedLocationClient;
+    private FusedLocationProviderClient mFusedLocationClient;
     String currentAddress;
     static DialogInterface currentDialogInterface;
     LocationManager locationManager;
@@ -124,8 +124,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         requestWindowFeature(Window.FEATURE_ACTION_BAR);
         setContentView(R.layout.activity_sensor);
 
-
-        /*LocationRequest mLocationRequest = LocationRequest.create();
+        LocationRequest mLocationRequest = LocationRequest.create();
         mLocationRequest.setInterval(60000);
         mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -145,13 +144,13 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                 }
             }
         };
-        LocationServices.getFusedLocationProviderClient(SensorActivity.this).requestLocationUpdates(mLocationRequest, mLocationCallback, null);*/
+        LocationServices.getFusedLocationProviderClient(SensorActivity.this).requestLocationUpdates(mLocationRequest, mLocationCallback, null);
 
         //locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
         //Intent intent = new Intent(SensorActivity.this,LocationUpdateService.class);
         //startService(intent);
-/*
+
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(SensorActivity.this);
 
@@ -245,7 +244,9 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                     Log.d("dataSnapshot.child: ",dataSnapshot.getValue().toString());
                 }
                 else {
-                    seconds=5;
+                    Intent intent = new Intent(SensorActivity.this, SettingsActivity.class);
+                    intent.putExtra("IMEINumber", IMEINumber);
+                    startActivity(intent);
                 }
 
             }
@@ -265,6 +266,8 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         start = (Button) findViewById(R.id.start);
         stop = (Button) findViewById(R.id.stop);
         startService = (Button)findViewById(R.id.buttonService);
+
+
 
         output = (TextView) findViewById(R.id.label_light);
 
@@ -353,6 +356,9 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
             }
         });
 
+        startService.performClick();
+
+
         if (getIntent().getExtras() != null)
             Log.v("Sıkıntı", getIntent().getExtras().getString("isBacked1"));
 
@@ -407,7 +413,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     }
 
     private void doOnEmergency() {
-        /*
+
         mFusedLocationClient.getLastLocation()
                 .addOnSuccessListener(SensorActivity.this, new OnSuccessListener<Location>() {
                     @Override
@@ -425,7 +431,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                         }
                     }
                 });
-                */
+
         Handler mainHandler = new Handler(Looper.getMainLooper());
 
         Runnable myRunnable = new Runnable() {
@@ -498,7 +504,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            stop.performClick();
+                            doOnStoppingEmergency();
                         }
                     }, seconds*1000);
                 }
@@ -511,6 +517,10 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
 
     }
 
+
+    public void doOnStoppingEmergency(){
+        stop.performClick();
+    }
 
 
     public String getCompleteAddress(double latitude, double longitude) {
@@ -559,92 +569,8 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
        @SuppressLint("StringFormatInvalid")
        @Override
        public final void onSensorChanged(SensorEvent event) {
-           float currentValue = event.values[0];
-
-           int sensorType = event.sensor.getType();
-
-           String name1 = event.sensor.getName();
-
-           // textt.setText(textt.getText() + " " + name1);
-
-           switch (sensorType) {
-               case Sensor.TYPE_PRESSURE:
-                   break;
-
-               case Sensor.TYPE_AMBIENT_TEMPERATURE:
-                   float x = event.values[0];
-                   if (x > 80) {
-                       emergencyMode();
-                   }
-                   break;
-
-               case Sensor.TYPE_ACCELEROMETER:
-
-                /*
-                String name1 = event.sensor.getName();
-                TextView textt = (TextView) findViewById(R.id.label_light);
-                textt.setText(textt.getText() + " " + name1);
-
-                deltaX = Math.abs(lastX - event.values[0]);
-                deltaY = Math.abs(lastY - event.values[1]);
-                deltaZ = Math.abs(lastZ - event.values[2]);
-
-                if (deltaX < 2)
-                deltaX = 0;
-                if (deltaY < 2)
-                deltaY = 0;
-                if ((deltaX > vibrateThreshold) || (deltaY > 9.81f) || (deltaZ > vibrateThreshold)) {
-                // textt.setText("Oluyor mu acaba???");
-            }*/
-
-                float X = event.values[0];
-                float Y = event.values[1];
-                float Z = event.values[2];
-
-                accelerationLast = accelerationCurrent;
-
-                accelerationCurrent = (float) Math.sqrt(Math.pow(X, 2)
-                        + Math.pow(Y, 2)
-                        + Math.pow(Z, 2));
-
-                float delta = accelerationCurrent - accelerationLast;
-
-                acceleration = acceleration * 0.9f + delta;
-
-                float a = event.values[0];
-                float b = event.values[1];
-                float c = event.values[2];
-
-                rootSquare = Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2) + Math.pow(c, 2));
-                if (rootSquare < 2.0) {
-                    emergencyMode();
-                }
 
 
-               // DecimalFormat precision = new DecimalFormat("0.00");// Telefona yüklerken virgül yap
-                //double ldAccRound = Double.parseDouble(precision.format(accelerationCurrent));
-
-/*
-                if (ldAccRound > 0.3d && ldAccRound < 0.5d) {
-                    emergencyMode();
-                }
-
-                if (acceleration > 51) {
-                    emergencyMode();
-                }
-*/
-
-                break;
-
-            case Sensor.TYPE_GYROSCOPE:
-                name1 = event.sensor.getName();
-                textt = (TextView) findViewById(R.id.label_light);
-                //textt.setText("Vay???");
-                break;
-
-            case Sensor.TYPE_LIGHT:
-                break;
-        }
 
         // Do something with this sensor data.
     }
@@ -817,6 +743,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                             dialog.cancel();
                             textt.setText("Everything's okay!");
                             shouldGoIntoEmergencyMode = false;
+                            isEmergancyMode=false;
                             r.stop();
                         }
                     });
@@ -854,7 +781,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                         isEmergancyMode = false;
                     }
                 }
-            }, 5000); // the timer will count 5 seconds....
+            }, 20000); // the timer will count 5 seconds....
 
 
            /* if(shouldGoIntoEmergencyMode) {
@@ -970,6 +897,25 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     public void surfaceChanged(SurfaceHolder holder, int format, int width,
                                int height) {
     }
+
+
+
+        public void getInfo(View view) {
+            AlertDialog.Builder builder1 = new AlertDialog.Builder(SensorActivity.this);
+            builder1.setMessage("This app is prepared to help you in moments of accident and emergency. Please make sure you have adjusted your settings correctly before you start using the appcident.");
+            builder1.setCancelable(true);
+
+            builder1.setPositiveButton(
+                    "Understand!",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            AlertDialog alert11 = builder1.create();
+            alert11.show();
+        }
+
 /*
     public void surfaceDestroyed(SurfaceHolder holder) {
         if (recording) {
@@ -979,4 +925,5 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         recorder.release();
     }
     */
+
 }
