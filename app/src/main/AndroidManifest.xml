@@ -40,8 +40,6 @@
 
         <service android:name=".BackService" />
 
-        <activity android:name=".VideoCapture" />
-
         <service
             android:name=".CameraService"
             android:enabled="true"
