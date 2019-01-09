@@ -43,13 +43,10 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.*;
-
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -126,8 +123,6 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_ACTION_BAR);
         setContentView(R.layout.activity_sensor);
-
-
 
         LocationRequest mLocationRequest = LocationRequest.create();
         mLocationRequest.setInterval(60000);
@@ -574,92 +569,8 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
        @SuppressLint("StringFormatInvalid")
        @Override
        public final void onSensorChanged(SensorEvent event) {
-           float currentValue = event.values[0];
-
-           int sensorType = event.sensor.getType();
-
-           String name1 = event.sensor.getName();
-
-           // textt.setText(textt.getText() + " " + name1);
-
-           switch (sensorType) {
-               case Sensor.TYPE_PRESSURE:
-                   break;
-
-               case Sensor.TYPE_AMBIENT_TEMPERATURE:
-                   float x = event.values[0];
-                   if (x > 80) {
-                       emergencyMode();
-                   }
-                   break;
-
-               case Sensor.TYPE_ACCELEROMETER:
-
-                /*
-                String name1 = event.sensor.getName();
-                TextView textt = (TextView) findViewById(R.id.label_light);
-                textt.setText(textt.getText() + " " + name1);
-
-                deltaX = Math.abs(lastX - event.values[0]);
-                deltaY = Math.abs(lastY - event.values[1]);
-                deltaZ = Math.abs(lastZ - event.values[2]);
-
-                if (deltaX < 2)
-                deltaX = 0;
-                if (deltaY < 2)
-                deltaY = 0;
-                if ((deltaX > vibrateThreshold) || (deltaY > 9.81f) || (deltaZ > vibrateThreshold)) {
-                // textt.setText("Oluyor mu acaba???");
-            }*/
-
-                float X = event.values[0];
-                float Y = event.values[1];
-                float Z = event.values[2];
-
-                accelerationLast = accelerationCurrent;
-
-                accelerationCurrent = (float) Math.sqrt(Math.pow(X, 2)
-                        + Math.pow(Y, 2)
-                        + Math.pow(Z, 2));
-
-                float delta = accelerationCurrent - accelerationLast;
-
-                acceleration = acceleration * 0.9f + delta;
-
-                float a = event.values[0];
-                float b = event.values[1];
-                float c = event.values[2];
-
-                rootSquare = Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2) + Math.pow(c, 2));
-                if (rootSquare < 2.0) {
-                    emergencyMode();
-                }
 
 
-               // DecimalFormat precision = new DecimalFormat("0.00");// Telefona yüklerken virgül yap
-                //double ldAccRound = Double.parseDouble(precision.format(accelerationCurrent));
-
-/*
-                if (ldAccRound > 0.3d && ldAccRound < 0.5d) {
-                    emergencyMode();
-                }
-
-                if (acceleration > 51) {
-                    emergencyMode();
-                }
-*/
-
-                break;
-
-            case Sensor.TYPE_GYROSCOPE:
-                name1 = event.sensor.getName();
-                textt = (TextView) findViewById(R.id.label_light);
-                //textt.setText("Vay???");
-                break;
-
-            case Sensor.TYPE_LIGHT:
-                break;
-        }
 
         // Do something with this sensor data.
     }
@@ -1014,4 +925,5 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         recorder.release();
     }
     */
+
 }
