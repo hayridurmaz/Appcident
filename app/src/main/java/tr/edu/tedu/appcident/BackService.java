@@ -99,7 +99,7 @@ public class BackService extends Service implements SensorEventListener {
         Heats[currentHeatArrayIndex]=x;
 
 
-        if(Math.abs(Heats[0]-Heats[29])>4){
+        if((Math.abs(Heats[0]-Heats[29])>4)&& (Heats[0]!=0) && Heats[29]!=0){
             onEmergency();
         }
 
