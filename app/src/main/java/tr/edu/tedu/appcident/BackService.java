@@ -153,17 +153,19 @@ public class BackService extends Service implements SensorEventListener {
         String name1 = event.sensor.getName();
 
         // textt.setText(textt.getText() + " " + name1);
-        Log.w("SENSOR NAME",name1);
+        //Log.w("SENSOR NAME",name1);
         switch (sensorType) {
             case Sensor.TYPE_PRESSURE:
                 break;
 
             case Sensor.TYPE_AMBIENT_TEMPERATURE:
+
                 float x = event.values[0];
 
-                Toast toast = Toast.makeText(this, x+"", Toast.LENGTH_SHORT);
-                toast.show();
+                //Toast toast = Toast.makeText(this, x+"", Toast.LENGTH_SHORT);
+                //toast.show();
                 if((Timer==0)||(System.currentTimeMillis()-Timer>=1)){
+                    Log.e("qqqqqqqqqqqq", "SIKINTIIIII");
                     sendDataToHeatArray(x);
                     Timer=System.currentTimeMillis();
                 }
@@ -306,15 +308,7 @@ public class BackService extends Service implements SensorEventListener {
             }
 
             else {
-                Intent i = new Intent();
-                i.setAction(Intent.ACTION_VIEW);
-                i.setClassName("tr.edu.tedu.appcident",
-                        "tr.edu.tedu.appcident.SensorActivity");
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                i.putExtra("isBacked", true);
-                i.putExtra("isBacked1", "trueee");
-
-                startActivity(i);
+                onEmergency();
             }
 
         }
