@@ -484,7 +484,9 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
             e.printStackTrace();
         }*/
 
-
+        if(currentAddress==null || currentAddress.equalsIgnoreCase("null")){
+            currentAddress="Cannot determined";
+        }
         sendSMS("+905058978796", "Your friend may be in trouble in " + LAT+", "+ LON+" , "+currentAddress);
         File folder = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + "APPCIDENT");
         if (!folder.exists()) {
