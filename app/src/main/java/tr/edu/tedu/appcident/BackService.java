@@ -28,6 +28,9 @@ public class BackService extends Service implements SensorEventListener {
     private Sensor mGyroscope;
     private Sensor mLight;
     private Sensor mRotation;
+    private static float Heats[];
+    private static int currentHeatArrayIndex;
+    private float Timer;
 
     private double rootSquare = 0;
 
@@ -55,12 +58,26 @@ public class BackService extends Service implements SensorEventListener {
         accelerationLast = SensorManager.GRAVITY_EARTH;
         acceleration = 0.0f;
 
+        Heats= new float[30];
+        Timer=0;
+
         super.onCreate();
 
         Toast toast = Toast.makeText(this, "Service is active!!", Toast.LENGTH_SHORT);
         toast.show();
     }
 
+    void onEmergency(){
+        Intent i = new Intent();
+        i.setAction(Intent.ACTION_VIEW);
+        i.setClassName("tr.edu.tedu.appcident",
+                "tr.edu.tedu.appcident.SensorActivity");
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        i.putExtra("isBacked", true);
+        i.putExtra("isBacked1", "trueee");
+
+        startActivity(i);
+    }
     @Override
     public IBinder onBind(Intent intent) {
         // TODO Auto-generated method stub
@@ -72,6 +89,21 @@ public class BackService extends Service implements SensorEventListener {
         super.onDestroy();
     }
 
+    void sendDataToHeatArray(float x){
+        if(currentHeatArrayIndex<30){
+            currentHeatArrayIndex++;
+        }
+        else{
+            currentHeatArrayIndex=0;
+        }
+        Heats[currentHeatArrayIndex]=x;
+
+
+        if(Math.abs(Heats[0]-Heats[29])>4){
+            onEmergency();
+        }
+
+    }
     @Override
     public void onSensorChanged(SensorEvent event) {
         float currentValue = event.values[0];
@@ -81,21 +113,22 @@ public class BackService extends Service implements SensorEventListener {
         String name1 = event.sensor.getName();
 
         // textt.setText(textt.getText() + " " + name1);
-
+        Log.w("SENSOR NAME",name1);
         switch (sensorType) {
             case Sensor.TYPE_PRESSURE:
                 break;
 
             case Sensor.TYPE_AMBIENT_TEMPERATURE:
                 float x = event.values[0];
-                if (x > 60) {
-                    Intent i = new Intent();
-                    i.setAction(Intent.ACTION_VIEW);
-                    i.setClassName("tr.edu.tedu.appcident",
-                            "tr.edu.tedu.appcident.SplashScreen");
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-                    startActivity(i);
+                Toast toast = Toast.makeText(this, x+"", Toast.LENGTH_SHORT);
+                toast.show();
+                if((Timer==0)||(System.currentTimeMillis()-Timer>=1)){
+                    sendDataToHeatArray(x);
+                    Timer=System.currentTimeMillis();
+                }
+                if (x > 60) {
+                    onEmergency();
                 }
                 break;
 
