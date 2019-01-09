@@ -16,6 +16,15 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
+
+/*
+ * Class Name: BackService
+ * Created:10.01.1019
+ * Author:  Batuhan Mert Karabulut
+ *
+ * It is the camera service that captures the video on an emergency mode.
+ *
+ * */
 public class CameraService extends Service {
     private static final String TAG = "RecorderService";
     private SurfaceView mSurfaceView;

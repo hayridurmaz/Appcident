@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!--
+     * Layout Name: Activity_Viceo_Capture
+     * Created:10.01.1019
+     * Author: Batuhan Mert Karabulut
+     *
+     * It is an layout file for Video Capturing surface view.
+     *
+     -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="fill_parent"

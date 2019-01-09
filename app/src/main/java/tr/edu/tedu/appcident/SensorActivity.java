@@ -67,6 +67,17 @@ import java.util.TimerTask;
 
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
+
+/*
+ * Class Name: SensorActivity
+ * Created:10.01.1019
+ * Author: Hayri Durmaz, Batuhan Mert Karabulut
+ *
+ * It is the main activity which opens when the emergency occurs or user opens the app.
+ * This activity does everything related to the applications main purposes.
+ *
+ * */
+
 public class SensorActivity extends AppCompatActivity implements SensorEventListener, SurfaceHolder.Callback /*, View.OnClickListener, SurfaceHolder.Callback*/ {
     private static final int INTENTCAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
     private SensorManager mSensorManager;

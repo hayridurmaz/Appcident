@@ -1,5 +1,13 @@
 package tr.edu.tedu.appcident;
 
+/*
+* Class Name: User
+* Created:10.01.1019
+* Author: Hayri Durmaz
+*
+* It represents User objects stored in Firebase Database
+*
+* */
 public class User {
     public String number1, number2, number3, imei;
     int recordTime;
