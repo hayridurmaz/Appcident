@@ -25,6 +25,16 @@ import java.util.Map;
 
 public class SplashScreen extends AppCompatActivity {
 
+    /*
+     * Class Name: SplashScreen
+     * Created:10.01.1019
+     * Author: Batuhan Mert Karabulut
+     *
+     * It is an activity which is shown as the first opening screen
+     * of the application. Also, All the permissions are taken here.
+     *
+     * */
+
     String loginstatus;
     final private int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 124;
     @Override
@@ -46,27 +56,6 @@ public class SplashScreen extends AppCompatActivity {
                 }
             }
         }, 3000);
-
-   /*     Thread background = new Thread() {
-            public void run() {
-
-                try {
-                    // Thread will sleep for 10 seconds
-                    sleep(4*1000);
-
-                    startActivity(new Intent(SplashScreen.this,HomeActivity.class));
-
-
-                    finish();
-
-                } catch (Exception e) {
-
-                }
-            }
-        };
-
-        // start thread
-        background.start();*/
     }
 
 

@@ -19,6 +19,16 @@ import android.view.SurfaceView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/*
+ * Class Name: BackService
+ * Created:10.01.1019
+ * Author:  Batuhan Mert Karabulut
+ *
+ * It is the main back service that listens the sensors and opens Sensor Activity
+ * if necessary.
+ *
+ * */
+
 public class BackService extends Service implements SensorEventListener {
 
     private SensorManager mSensorManager;

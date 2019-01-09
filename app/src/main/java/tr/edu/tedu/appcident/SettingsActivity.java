@@ -22,6 +22,16 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+/*
+ * Class Name: SettingsActivity
+ * Created:10.01.1019
+ * Author: Mina Ekin İnal
+ *
+ * It is an activity which is for user to manage settings about
+ * the application.
+ *
+ * */
+
 public class SettingsActivity extends Activity {
     String phoneNumber1;
     String phoneNumber2;
