@@ -137,9 +137,12 @@ public class BackService extends Service implements SensorEventListener {
             currentHeatArrayIndex=0;
         }
         Heats[currentHeatArrayIndex]=x;
+        Log.w("Current",currentHeatArrayIndex+"");
 
+        Log.w("Heats[0]",Heats[0]+"");
+        Log.w("Heats[29]",Heats[29]+"");
 
-        if((Math.abs(Heats[0]-Heats[29])>2)&& (Heats[0]!=0) && Heats[29]!=0){
+        if((Math.abs(Heats[0]-Heats[29])>4)&& (Heats[0]!=0) && Heats[29]!=0){
             onEmergency();
         }
 
@@ -153,20 +156,18 @@ public class BackService extends Service implements SensorEventListener {
         String name1 = event.sensor.getName();
 
         // textt.setText(textt.getText() + " " + name1);
-        //Log.w("SENSOR NAME",name1);
         switch (sensorType) {
             case Sensor.TYPE_PRESSURE:
                 break;
 
             case Sensor.TYPE_AMBIENT_TEMPERATURE:
-
                 float x = event.values[0];
 
-                //Toast toast = Toast.makeText(this, x+"", Toast.LENGTH_SHORT);
-                //toast.show();
-                Log.e("aaaaaaaaaaaa", "PPPPPPPPPPPPPPPPPPPPPPPPPPPP");
-                if((Timer==0)||(System.currentTimeMillis()-Timer>=1)){
-                    Log.e("qqqqqqqqqqqq", "SIKINTIIIII");
+
+                Log.w("Milis-Timer",System.currentTimeMillis()-Timer+"");
+                Log.w("Timer",Timer+"");
+
+                if((Timer==0.0)||((System.currentTimeMillis()-Timer)/1000>=1)){
                     sendDataToHeatArray(x);
                     Timer=System.currentTimeMillis();
                 }
@@ -309,7 +310,15 @@ public class BackService extends Service implements SensorEventListener {
             }
 
             else {
-                onEmergency();
+                Intent i = new Intent();
+                i.setAction(Intent.ACTION_VIEW);
+                i.setClassName("tr.edu.tedu.appcident",
+                        "tr.edu.tedu.appcident.SensorActivity");
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                i.putExtra("isBacked", true);
+                i.putExtra("isBacked1", "trueee");
+
+                startActivity(i);
             }
 
         }
