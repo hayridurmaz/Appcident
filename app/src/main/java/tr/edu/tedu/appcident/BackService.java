@@ -46,7 +46,7 @@ public class BackService extends Service implements SensorEventListener {
     private Sensor mRotation;
     private static float Heats[];
     private static int currentHeatArrayIndex;
-    private float Timer;
+    private long Timer;
 
     private double rootSquare = 0;
 
@@ -130,7 +130,7 @@ public class BackService extends Service implements SensorEventListener {
     }
 
     void sendDataToHeatArray(float x){
-        if(currentHeatArrayIndex<30){
+        if(currentHeatArrayIndex<29){
             currentHeatArrayIndex++;
         }
         else{
@@ -139,7 +139,7 @@ public class BackService extends Service implements SensorEventListener {
         Heats[currentHeatArrayIndex]=x;
 
 
-        if((Math.abs(Heats[0]-Heats[29])>4)&& (Heats[0]!=0) && Heats[29]!=0){
+        if((Math.abs(Heats[0]-Heats[29])>2)&& (Heats[0]!=0) && Heats[29]!=0){
             onEmergency();
         }
 
@@ -164,6 +164,7 @@ public class BackService extends Service implements SensorEventListener {
 
                 //Toast toast = Toast.makeText(this, x+"", Toast.LENGTH_SHORT);
                 //toast.show();
+                Log.e("aaaaaaaaaaaa", "PPPPPPPPPPPPPPPPPPPPPPPPPPPP");
                 if((Timer==0)||(System.currentTimeMillis()-Timer>=1)){
                     Log.e("qqqqqqqqqqqq", "SIKINTIIIII");
                     sendDataToHeatArray(x);
