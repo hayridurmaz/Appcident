@@ -46,7 +46,7 @@ public class BackService extends Service implements SensorEventListener {
     private Sensor mRotation;
     private static float Heats[];
     private static int currentHeatArrayIndex;
-    private float Timer;
+    private long Timer;
 
     private double rootSquare = 0;
 
@@ -130,14 +130,17 @@ public class BackService extends Service implements SensorEventListener {
     }
 
     void sendDataToHeatArray(float x){
-        if(currentHeatArrayIndex<30){
+        if(currentHeatArrayIndex<29){
             currentHeatArrayIndex++;
         }
         else{
             currentHeatArrayIndex=0;
         }
         Heats[currentHeatArrayIndex]=x;
+        Log.w("Current",currentHeatArrayIndex+"");
 
+        Log.w("Heats[0]",Heats[0]+"");
+        Log.w("Heats[29]",Heats[29]+"");
 
         if((Math.abs(Heats[0]-Heats[29])>4)&& (Heats[0]!=0) && Heats[29]!=0){
             onEmergency();
@@ -153,7 +156,6 @@ public class BackService extends Service implements SensorEventListener {
         String name1 = event.sensor.getName();
 
         // textt.setText(textt.getText() + " " + name1);
-        Log.w("SENSOR NAME",name1);
         switch (sensorType) {
             case Sensor.TYPE_PRESSURE:
                 break;
@@ -161,9 +163,11 @@ public class BackService extends Service implements SensorEventListener {
             case Sensor.TYPE_AMBIENT_TEMPERATURE:
                 float x = event.values[0];
 
-                Toast toast = Toast.makeText(this, x+"", Toast.LENGTH_SHORT);
-                toast.show();
-                if((Timer==0)||(System.currentTimeMillis()-Timer>=1)){
+
+                Log.w("Milis-Timer",System.currentTimeMillis()-Timer+"");
+                Log.w("Timer",Timer+"");
+
+                if((Timer==0.0)||((System.currentTimeMillis()-Timer)/1000>=1)){
                     sendDataToHeatArray(x);
                     Timer=System.currentTimeMillis();
                 }
