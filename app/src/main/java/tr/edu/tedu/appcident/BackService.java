@@ -73,6 +73,7 @@ public class BackService extends Service implements SensorEventListener {
     @Override
     public void onCreate() {
 
+        //Sensor initializiaton.
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mPressure = mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
         mHeat = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
@@ -81,6 +82,7 @@ public class BackService extends Service implements SensorEventListener {
         mLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         mRotation = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
+        //Sensor registers.
         mSensorManager.registerListener(this, mPressure, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mAcceleration, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mHeat, SensorManager.SENSOR_DELAY_NORMAL);
@@ -88,15 +90,16 @@ public class BackService extends Service implements SensorEventListener {
         mSensorManager.registerListener(this, mLight, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mRotation, SensorManager.SENSOR_DELAY_NORMAL);
 
+        //Required variables for accelerometer sensor data.
         accelerationCurrent = SensorManager.GRAVITY_EARTH;
         accelerationLast = SensorManager.GRAVITY_EARTH;
         acceleration = 0.0f;
-
 
         accData1 = new float[60];
         accData2 = new float[60];
         accData3 = new float[60];
 
+        //Required variables for ambient temperature sensor data.
         Heats= new float[30];
         Timer=0;
 
@@ -118,12 +121,15 @@ public class BackService extends Service implements SensorEventListener {
 
         startActivity(i);
     }
+
+    //Required method for service class.
     @Override
     public IBinder onBind(Intent intent) {
         // TODO Auto-generated method stub
         return null;
     }
 
+    //Required method for service class.
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -147,55 +153,41 @@ public class BackService extends Service implements SensorEventListener {
         }
 
     }
+
+    //The method that handles and deals sensor data.
     @Override
     public void onSensorChanged(SensorEvent event) {
-        float currentValue = event.values[0];
 
         int sensorType = event.sensor.getType();
 
-        String name1 = event.sensor.getName();
-
-        // textt.setText(textt.getText() + " " + name1);
         switch (sensorType) {
-            case Sensor.TYPE_PRESSURE:
-                break;
 
+            //This section handles ambient temperature sensor data.
             case Sensor.TYPE_AMBIENT_TEMPERATURE:
                 float x = event.values[0];
 
 
                 Log.w("Milis-Timer",System.currentTimeMillis()-Timer+"");
                 Log.w("Timer",Timer+"");
-
                 if((Timer==0.0)||((System.currentTimeMillis()-Timer)/1000>=1)){
                     sendDataToHeatArray(x);
                     Timer=System.currentTimeMillis();
                 }
+
                 if (x > 60) {
                     onEmergency();
                 }
+
                 break;
 
+            //This section handles accelerometer sensor data.
             case Sensor.TYPE_ACCELEROMETER:
-                /*String name1 = event.sensor.getName();
-                TextView textt = (TextView) findViewById(R.id.label_light);
-                textt.setText(textt.getText() + " " + name1);
 
-                deltaX = Math.abs(lastX - event.values[0]);
-                deltaY = Math.abs(lastY - event.values[1]);
-                deltaZ = Math.abs(lastZ - event.values[2]);
-
-                if (deltaX < 2)
-                deltaX = 0;
-                if (deltaY < 2)
-                deltaY = 0;
-                if ((deltaX > vibrateThreshold) || (deltaY > 9.81f) || (deltaZ > vibrateThreshold)) {
-                // textt.setText("Oluyor mu acaba???");
-            }*/
                 float X = event.values[0];
                 float Y = event.values[1];
                 float Z = event.values[2];
 
+                //Calculations for accident detection with accelerometer data.
                 accelerationLast = accelerationCurrent;
 
                 accelerationCurrent = (float) Math.sqrt(Math.pow(X, 2)
@@ -210,7 +202,7 @@ public class BackService extends Service implements SensorEventListener {
                 float b = event.values[1];
                 float c = event.values[2];
 
-                //Checking 30secs
+                //After an accident occurs, the application checks for any moment in a certain amount of time which is set by us.
                 if (ppp){
                     if (startListenTime == 0.0f){
                         startListenTime = System.currentTimeMillis();
@@ -218,42 +210,20 @@ public class BackService extends Service implements SensorEventListener {
                     currentListenTime = System.currentTimeMillis() - startListenTime;
 
                     if ((int)(currentListenTime / 1000) == secondSent + 1){
-                        //Toast.makeText(BackService.this, (int)(currentListenTime / 1000) + "!!!" + secondSent, Toast.LENGTH_LONG).show();
                         secondSent++;
-                        //Toast.makeText(BackService.this, a + "!!!", Toast.LENGTH_SHORT).show();
                         accelerometerData(a, b, c);
                     }
                 }
 
+                //This section handles the detection of an accident with accelerometer data.
                 rootSquare = Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2) + Math.pow(c, 2));
                 if (rootSquare < 2.0 && !ppp) {
                     ppp = true;
                     Toast.makeText(BackService.this, "KOYDUK", Toast.LENGTH_SHORT).show();
                 }
 
-
-                // DecimalFormat precision = new DecimalFormat("0.00");// Telefona yüklerken virgül yap
-                //double ldAccRound = Double.parseDouble(precision.format(accelerationCurrent));
-
-/*
-                if (ldAccRound > 0.3d && ldAccRound < 0.5d) {
-                    emergencyMode();
-                }
-
-                if (acceleration > 51) {
-                    emergencyMode();
-                }
-*/
                 break;
 
-            case Sensor.TYPE_GYROSCOPE:
-                name1 = event.sensor.getName();
-
-                //textt.setText("Vay???");
-                break;
-
-            case Sensor.TYPE_LIGHT:
-                break;
         }
     }
 
@@ -262,14 +232,12 @@ public class BackService extends Service implements SensorEventListener {
 
     }
 
+    //In this method, the data that come from accelerometer sensor are handled.
     public void accelerometerData (float a, float b, float c){
         accData1[secondSent] = a;
         accData2[secondSent] = b;
         accData3[secondSent] = c;
         boolean isOK = false;
-
-        //Toast.makeText(BackService.this, secondSent + "!!!" + a, Toast.LENGTH_LONG).show();
-
 
         if (secondSent > 0){
 
@@ -285,8 +253,8 @@ public class BackService extends Service implements SensorEventListener {
             }
         }
 
+        //When the user is safe, this section resets the required parameters.
         if (isOK){
-            //Toast.makeText(BackService.this,"SAFEEE" + a, Toast.LENGTH_LONG).show();
             ppp = false;
             secondSent = -1;
             startListenTime = 0;
@@ -297,7 +265,9 @@ public class BackService extends Service implements SensorEventListener {
             isStopped = false;
         }
 
+        //After amount of time, if the user is not safe, emergency mode will be triggered.
         if (secondSent == 10){
+            //If the user is still moving after amount of time, required parameters will be reset.
             if (stillMoving){
                 ppp = false;
                 secondSent = -1;
@@ -310,21 +280,14 @@ public class BackService extends Service implements SensorEventListener {
             }
 
             else {
-                Intent i = new Intent();
-                i.setAction(Intent.ACTION_VIEW);
-                i.setClassName("tr.edu.tedu.appcident",
-                        "tr.edu.tedu.appcident.SensorActivity");
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                i.putExtra("isBacked", true);
-                i.putExtra("isBacked1", "trueee");
-
-                startActivity(i);
+                onEmergency();
             }
 
         }
 
     }
 
+    //We are using shake detection method for any movement during the time that application checks if the user is safe or not.
     public boolean shakeData(float x1, float y1, float z1){
         long curTime = System.currentTimeMillis();
         // Only allow one update every 100ms.

@@ -71,30 +71,27 @@ public class SettingsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
+        //Firebase initialization.
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         final DatabaseReference myRef = database.getReference("Users");
-        // myRef.setValue("sa","as");
-
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
+        //Handling IMEI number operations.
         Bundle extras = getIntent().getExtras();
         IMEINumber = extras.getString("IMEINumber");
 
         IMEITextView = (TextView)findViewById(R.id.IMEITextView);
         IMEITextView.setText(IMEITextView.getText().toString() + " " + IMEINumber);
 
-
         progressBar=(ProgressBar) findViewById(R.id.progressBar);
         seconds=(TextView) findViewById(R.id.Seconds);
         seekBar=(SeekBar) findViewById(R.id.seekBar);
 
-
-
-
             progressBar.setProgress(50);
             seconds.setText("50");
 
+            //Handling record duration seekbar object.
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -115,8 +112,7 @@ public class SettingsActivity extends Activity {
             }
         });
 
-
-
+        //Connection between layout and the activity.
         phoneInput1 = (EditText) findViewById(R.id.phoneInput1);
         phoneInput2 = (EditText) findViewById(R.id.phoneInput2);
         phoneInput3 = (EditText) findViewById(R.id.phoneInput3);
@@ -151,6 +147,7 @@ public class SettingsActivity extends Activity {
         };
         myRef.addValueEventListener(postListener);
 
+        //Click listener for submit button of settings menu. This section also handles phone number inputs.
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -159,28 +156,30 @@ public class SettingsActivity extends Activity {
                     phoneInput1.setError("Please enter valid number");
                 } else {
                     phoneNumber1 = phoneInput1.getText().toString();
-
                 }
 
                 phoneNumber2 = phoneInput2.getText().toString();
+
                 if (phoneInput2.getText().length() != 11) {
                     phoneInput2.setError("Please enter valid number");
                 } else {
                     phoneNumber2 = phoneInput2.getText().toString();
                 }
+
                 phoneNumber3 = phoneInput3.getText().toString();
+
                 if (phoneInput3.getText().length() != 11) {
                     phoneInput3.setError("Please enter valid number");
                 } else {
                     phoneNumber3 = phoneInput3.getText().toString();
                 }
+
                 if (phoneNumber3.length() == 11 && phoneNumber2.length() == 11 && phoneNumber1.length() == 11) {
                     showToast("Now your emergency list is ready!!");
 
+                    //Putting needed variables into firebase database.
                     user = new User(phoneNumber1, phoneNumber2, phoneNumber3,IMEINumber,progressBar.getProgress());
                     myRef.child(IMEINumber).setValue(user);
-
-
 
                     Intent intent = new Intent(SettingsActivity.this, SensorActivity.class);
                     startActivity(intent);

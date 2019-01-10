@@ -135,6 +135,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         requestWindowFeature(Window.FEATURE_ACTION_BAR);
         setContentView(R.layout.activity_sensor);
 
+        //Location operations are handled in this section.
         LocationRequest mLocationRequest = LocationRequest.create();
         mLocationRequest.setInterval(60000);
         mLocationRequest.setFastestInterval(5000);
@@ -184,15 +185,8 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                     }
                 });
 
-
+        //Checking permissions.
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return;
         }
 
@@ -296,28 +290,15 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
 
         textt = (TextView) findViewById(R.id.label_light);
 
+        //Click listener of start emergency mode button.
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Intent intent = new Intent(SensorActivity.this, VideoRecorderActivity.CAMERA_SERVICE);
-                // startService()
-
-
-//                final int REQUEST_VIDEO_CAPTURE = 1;
-//
-//
-//                    Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-//                    if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
-//                        startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
-//                    }
-
                 emergencyMode();
-
-
             }
         });
 
-
+        //Click listener of stop emergency mode button.
         stop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -329,7 +310,6 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
 
                 stopService(new Intent(getApplicationContext(), CameraService.class));
 
-
                 try {
                     mediaRecorder.stop();
                     isEmergancyMode = false;
@@ -339,27 +319,10 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                 }
                 Toast.makeText(SensorActivity.this, "Kayıt durduruldu", Toast.LENGTH_LONG).show();
 
-               /* MediaPlayer mp = new MediaPlayer();
-                try{
-                    mp.setDataSource(currentPath);
-
-                }
-                catch (Exception e){
-
-                }
-                mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                    @Override
-                    public void onPrepared(MediaPlayer mp) {
-                        // Do something. For example: playButton.setEnabled(true);
-                        mp.start();
-                    }
-                });
-                mp.prepareAsync();*/
-
-
             }
         });
 
+        //Click listener of start service button. Starts sensor service of the application.
         startService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -369,14 +332,10 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
 
         startService.performClick();
 
-
-        if (getIntent().getExtras() != null)
-            Log.v("Sıkıntı", getIntent().getExtras().getString("isBacked1"));
-
+        //Checking if the sensor service sends emergency mode message through Extras.
         if (getIntent().getExtras() != null && getIntent().getExtras().getString("isBacked1").equals("trueee")){
             start.performClick();
         }
-
 
     }
 
@@ -497,18 +456,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                 .getAbsolutePath() + "/" +
                 Calendar.getInstance().getTime() + ".3gp";
 
-        /*
-        currentPath = AudioSavePathInDevice;
-        mediaRecorder = new MediaRecorder();
-        mediaRecorder.reset();
-        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
-        mediaRecorder.setOutputFile(AudioSavePathInDevice);
-        */
         try {
-            //mediaRecorder.prepare();
-            //mediaRecorder.start();
 
             runOnUiThread(new Runnable() {
                 @Override
@@ -527,9 +475,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
             e.printStackTrace();
         }
 
-
     }
-
 
     public void doOnStoppingEmergency(){
         stop.performClick();
@@ -583,65 +529,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
        @Override
        public final void onSensorChanged(SensorEvent event) {
 
-
-
-        // Do something with this sensor data.
-    }
-
-    private Uri getOutputMediaFileUri(int type) {
-
-        return Uri.fromFile(getOutputMediaFile(type));
-    }
-
-    /**
-     * Create a File for saving an image or video
-     */
-    private File getOutputMediaFile(int type) {
-
-        // Check that the SDCard is mounted
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "MyCameraVideo");
-
-
-        // Create the storage directory(MyCameraVideo) if it does not exist
-        if (!mediaStorageDir.exists()) {
-
-            if (!mediaStorageDir.mkdirs()) {
-
-
-                output.setText("Failed to create directory MyCameraVideo.");
-
-                Toast.makeText(SensorActivity.this, "Failed to create directory MyCameraVideo.",
-                        Toast.LENGTH_LONG).show();
-
-                Log.d("MyCameraVideo", "Failed to create directory MyCameraVideo.");
-                return null;
-            }
         }
-
-
-        // Create a media file name
-
-        // For unique file name appending current timeStamp with file name
-        java.util.Date date = new java.util.Date();
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
-                .format(date.getTime());
-
-        File mediaFile;
-
-        if (type == MEDIA_TYPE_VIDEO) {
-
-            // For unique video file name appending current timeStamp with file name
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "VID_" + timeStamp + ".mp4");
-
-        } else {
-            return null;
-        }
-
-        return mediaFile;
-    }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -702,9 +590,8 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                 });
 */
 
-       // Intent intent = new Intent(SensorActivity.this,LocationUpdateService.class);
-        //startService(intent);
 
+        //Registering sensors in order to get data from them.
         mSensorManager.registerListener(this, mPressure, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mAcceleration, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mHeat, SensorManager.SENSOR_DELAY_NORMAL);
@@ -716,26 +603,15 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
 
     @Override
     protected void onPause() {
-        // Be sure to unregister the sensor when the activity pauses.
         super.onPause();
 
-       // Intent intent = new Intent(SensorActivity.this,LocationUpdateService.class);
-        //stopService(intent);
-
+        //Unregistering sensor manager.
         mSensorManager.unregisterListener(this);
     }
 
 
     protected void emergencyMode() {
-        /*
-        SurfaceView cameraView = (SurfaceView) findViewById(R.id.CameraView);
-        holder = cameraView.getHolder();
-        holder.addCallback(this);
-        holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
-        cameraView.setClickable(true);
-        cameraView.setOnClickListener(this);
-        */
         if (!isEmergancyMode) {
             isEmergancyMode = true;
             textt.setText("Something's wrong?");
@@ -797,106 +673,13 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
             }, 20000); // the timer will count 5 seconds....
 
 
-           /* if(shouldGoIntoEmergencyMode) {
-                Thread timerThread = new Thread() {
-                    public void run() {
-                        try {
-                            sleep(5000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        } finally {
-
-
-                            doOnEmergency();
-                            if (alert11 != null) {
-                                alert11.cancel();
-                            }
-                            // Toast.makeText(SensorActivity.this,"No response, emerggency mode is started",Toast.LENGTH_LONG).show();
-
-                        }
-                    }
-                };
-                timerThread.start();
-            }*/
-
 
         } else {
             //shouldGoIntoEmergencyMode=false;
         }
 
     }
-/*
-    @Override
-    public void onLocationChanged(Location location) {
-        if(location!=null){
-            Log.w("location.getLatitude",location.getLatitude()+"");
-            Log.v("location.getLongitude",location.getLongitude()+"");
-            Log.v("location.mUserLocation",getCompleteAddress(LAT,LON));
-            if(location.getLatitude()!=0 &&location.getLongitude()!=0){
-                LAT=location.getLatitude();
-                LON=location.getLongitude();
-                mUserLocation=getCompleteAddress(LAT,LON);
-            }
-        }
 
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-
-    }*/
-    /*
-
-    private void initRecorder() {
-        recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
-        recorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
-
-        CamcorderProfile cpHigh = CamcorderProfile
-                .get(CamcorderProfile.QUALITY_HIGH);
-        recorder.setProfile(cpHigh);
-        recorder.setOutputFile("/sdcard/videocapture_example.mp4");
-        recorder.setMaxDuration(50000); // 50 seconds
-        recorder.setMaxFileSize(5000000); // Approximately 5 megabytes
-    }
-
-    private void prepareRecorder() {
-        recorder.setPreviewDisplay(holder.getSurface());
-
-        try {
-            recorder.prepare();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-            finish();
-        } catch (IOException e) {
-            e.printStackTrace();
-            finish();
-        }
-    }
-
-    public void onClick(View v) {
-        if (recording) {
-            recorder.stop();
-            recording = false;
-
-            // Let's initRecorder so we can record again
-            initRecorder();
-            prepareRecorder();
-        } else {
-            recording = true;
-            recorder.start();
-        }
-    }
-*/
     public void surfaceCreated(SurfaceHolder holder) {
 
     }
@@ -910,8 +693,6 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     public void surfaceChanged(SurfaceHolder holder, int format, int width,
                                int height) {
     }
-
-
 
         public void getInfo(View view) {
             AlertDialog.Builder builder1 = new AlertDialog.Builder(SensorActivity.this);
@@ -928,15 +709,5 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
             AlertDialog alert11 = builder1.create();
             alert11.show();
         }
-
-/*
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        if (recording) {
-            recorder.stop();
-            recording = false;
-        }
-        recorder.release();
-    }
-    */
 
 }
