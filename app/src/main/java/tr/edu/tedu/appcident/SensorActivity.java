@@ -98,18 +98,6 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
 
     private float accelerationCurrent, accelerationLast, acceleration;
 
-    private float deltaX = 0;
-    private float deltaY = 0;
-    private float deltaZ = 0;
-    private double rootSquare = 0;
-    private float lastX, lastY, lastZ;
-
-    private float vibrateThreshold = 0;
-
-    MediaRecorder recorder;
-    SurfaceHolder holder;
-    boolean recording = false;
-
     public Vibrator v;
     double LAT, LON;
     int seconds;
@@ -125,8 +113,6 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     private static final String TAG = "Recorder";
     public static SurfaceView mSurfaceView;
     public static SurfaceHolder mSurfaceHolder;
-    public static Camera mCamera ;
-    public static boolean mPreviewRunning;
 
     @SuppressLint("MissingPermission")
     @Override
@@ -194,23 +180,6 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         //getSupportActionBar();
         isEmergancyMode = false;
 
-/*
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-
-        recorder = new MediaRecorder();
-
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) //check if permission request is necessary
-        {
-            ActivityCompat.requestPermissions(this, new String[] {android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 200);
-        }
-
-        initRecorder();
-*/
-
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, 200);
         } else {
@@ -268,14 +237,14 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         mSurfaceHolder.addCallback(this);
         mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
+        //Connection between layout and activity.
         start = (Button) findViewById(R.id.start);
         stop = (Button) findViewById(R.id.stop);
         startService = (Button)findViewById(R.id.buttonService);
 
-
-
         output = (TextView) findViewById(R.id.label_light);
 
+        //Initializations for sensors.
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mPressure = mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
         mHeat = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
