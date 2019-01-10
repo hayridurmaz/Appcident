@@ -1,29 +1,16 @@
 package tr.edu.tedu.appcident;
-import java.io.IOException;
-import java.util.List;
+
+
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.PixelFormat;
-import android.hardware.Camera;
-import android.hardware.Camera.Size;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.media.MediaRecorder;
 import android.os.IBinder;
-import android.os.Parcel;
 import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.os.Parcelable;
-
-import com.google.android.gms.common.internal.safeparcel.AbstractSafeParcelable;
-import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
-import com.google.android.gms.location.DetectedActivity;
 
 /*
  * Class Name: BackService
@@ -47,7 +34,7 @@ public class BackService extends Service implements SensorEventListener {
     private static float Heats[];
     private static int currentHeatArrayIndex;
     private long Timer;
-
+    private static final int HEAT_CONTROL_SECOND=30;
     private double rootSquare = 0;
 
     public float[] accData1;
@@ -100,7 +87,7 @@ public class BackService extends Service implements SensorEventListener {
         accData3 = new float[60];
 
         //Required variables for ambient temperature sensor data.
-        Heats= new float[30];
+        Heats= new float[HEAT_CONTROL_SECOND];
         Timer=0;
 
 
@@ -135,6 +122,8 @@ public class BackService extends Service implements SensorEventListener {
         super.onDestroy();
     }
 
+
+    //Here heats per second are sent to the Heats array.
     void sendDataToHeatArray(float x){
         if(currentHeatArrayIndex<29){
             currentHeatArrayIndex++;
@@ -148,7 +137,8 @@ public class BackService extends Service implements SensorEventListener {
         Log.w("Heats[0]",Heats[0]+"");
         Log.w("Heats[29]",Heats[29]+"");
 
-        if((Math.abs(Heats[0]-Heats[29])>4)&& (Heats[0]!=0) && Heats[29]!=0){
+        if((Math.abs(Heats[0]-Heats[Heats.length-1])>4)&& (Heats[0]!=0) && Heats[Heats.length-1]!=0){
+            //If Heat difference become more than 10 C degree in 30 seconds, go into emergency mode!
             onEmergency();
         }
 
@@ -165,19 +155,16 @@ public class BackService extends Service implements SensorEventListener {
             //This section handles ambient temperature sensor data.
             case Sensor.TYPE_AMBIENT_TEMPERATURE:
                 float x = event.values[0];
-
-
-                Log.w("Milis-Timer",System.currentTimeMillis()-Timer+"");
-                Log.w("Timer",Timer+"");
+                //Start a timer and send it onto an array
                 if((Timer==0.0)||((System.currentTimeMillis()-Timer)/1000>=1)){
                     sendDataToHeatArray(x);
                     Timer=System.currentTimeMillis();
                 }
 
                 if (x > 60) {
+                    //If Heat is more than 60, directly go into emergency mode!
                     onEmergency();
                 }
-
                 break;
 
             //This section handles accelerometer sensor data.
