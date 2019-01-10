@@ -68,7 +68,7 @@ import java.util.TimerTask;
 /*
  * Class Name: SensorActivity
  * Created:10.01.1019
- * Author: Hayri Durmaz, Batuhan Mert Karabulut
+ * Author: Hayri Durmaz, Batuhan Mert Karabulut, Mina Ekin İnal
  *
  * It is the main activity which opens when the emergency occurs or user opens the app.
  * This activity does everything related to the applications main purposes.

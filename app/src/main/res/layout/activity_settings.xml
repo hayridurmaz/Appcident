@@ -18,12 +18,26 @@
     android:theme="@style/Theme.AppCompat">
 
 
+    <TextView
+        android:id="@+id/IMEITextView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="149dp"
+        android:layout_marginEnd="-10dp"
+        android:layout_toStartOf="@+id/Seconds"
+        android:text="Work on background?"
+        android:textColor="#6bc33a"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
     <LinearLayout
         android:layout_width="379dp"
         android:layout_height="293dp"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="144dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="206dp"
+        android:layout_marginEnd="16dp"
         android:background="@android:color/transparent"
         android:orientation="vertical">
 
@@ -31,9 +45,8 @@
             android:id="@+id/textView2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#6bc33a"
             android:text="@string/please_enter_3_phone_numbers_to_call_in_case_of_emergency"
-            />
+            android:textColor="#6bc33a" />
 
         <EditText
             android:id="@+id/phoneInput1"
@@ -41,23 +54,23 @@
             android:layout_height="40dp"
             android:background="@drawable/background"
             android:drawableRight="@drawable/person"
-            android:textColorHint="@color/colorPrimaryDark"
             android:ems="10"
-            android:textColor="#6bc33a"
             android:hint="@string/phone_number"
-            android:inputType="phone" />
+            android:inputType="phone"
+            android:textColor="#6bc33a"
+            android:textColorHint="@color/colorPrimaryDark" />
 
         <EditText
             android:id="@+id/phoneInput2"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:ems="10"
-            android:drawableRight="@drawable/person"
-            android:hint="@string/phone_number"
             android:background="@drawable/background"
-            android:textColorHint="@color/colorPrimaryDark"
+            android:drawableRight="@drawable/person"
+            android:ems="10"
+            android:hint="@string/phone_number"
+            android:inputType="phone"
             android:textColor="#6bc33a"
-            android:inputType="phone" />
+            android:textColorHint="@color/colorPrimaryDark" />
 
         <EditText
             android:id="@+id/phoneInput3"
@@ -67,29 +80,29 @@
             android:drawableRight="@drawable/person"
             android:ems="10"
             android:hint="@string/phone_number"
-            android:textColorHint="@color/colorPrimaryDark"
+            android:inputType="phone"
             android:textColor="#6bc33a"
-            android:inputType="phone" />
+            android:textColorHint="@color/colorPrimaryDark" />
 
         <Button
             android:id="@+id/submit"
             android:layout_width="150dp"
-            android:text="Save"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="110dp"
             android:background="#4e4e4b"
             android:drawableRight="@drawable/save"
+            android:text="Save"
             android:textColor="#6bc33a" />
 
         <TextView
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/these_phone_numbers_will_be_called_when_the_appcident_decide_you_re_in_danger"
-            android:textStyle="italic"
-            android:textColor="#6bc33a"
             android:background="@android:color/transparent"
-            android:textSize="18dp" />
+            android:text="@string/these_phone_numbers_will_be_called_when_the_appcident_decide_you_re_in_danger"
+            android:textColor="#6bc33a"
+            android:textSize="18dp"
+            android:textStyle="italic" />
     </LinearLayout>
 
     <TextView
@@ -149,5 +162,15 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="115dp" />
+
+    <ToggleButton
+        android:id="@+id/work_background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="-29dp"
+        android:layout_marginTop="140dp"
+        android:layout_toEndOf="@+id/IMEITextView"
+        android:text="ToggleButton" />
 
 </RelativeLayout>

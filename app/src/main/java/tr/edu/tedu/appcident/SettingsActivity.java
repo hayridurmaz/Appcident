@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,8 +15,10 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.ToggleButton;
 import android.widget.Toolbar;
 
+import com.google.firebase.FirebaseError;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -40,6 +43,7 @@ public class SettingsActivity extends Activity {
     EditText phoneInput1;
     EditText phoneInput2;
     EditText phoneInput3;
+    ToggleButton workOnBackground;
     User user;
 
     TextView seconds;
@@ -51,7 +55,7 @@ public class SettingsActivity extends Activity {
     TextView IMEITextView;
     TextView AddedPhones;
     String IMEINumber;
-
+    public boolean shouldWorkOnBackgroun;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -64,6 +68,7 @@ public class SettingsActivity extends Activity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
 
 
     @Override
@@ -81,24 +86,59 @@ public class SettingsActivity extends Activity {
         Bundle extras = getIntent().getExtras();
         IMEINumber = extras.getString("IMEINumber");
 
-        IMEITextView = (TextView)findViewById(R.id.IMEITextView);
+        IMEITextView = (TextView) findViewById(R.id.IMEITextView);
         IMEITextView.setText(IMEITextView.getText().toString() + " " + IMEINumber);
 
-        progressBar=(ProgressBar) findViewById(R.id.progressBar);
-        seconds=(TextView) findViewById(R.id.Seconds);
-        seekBar=(SeekBar) findViewById(R.id.seekBar);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        seconds = (TextView) findViewById(R.id.Seconds);
+        seekBar = (SeekBar) findViewById(R.id.seekBar);
+        workOnBackground = (ToggleButton) findViewById(R.id.work_background);
 
-            progressBar.setProgress(50);
-            seconds.setText("50");
 
-            //Handling record duration seekbar object.
+
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                boolean settingBackground;
+                if(dataSnapshot.child(IMEINumber).child("workOnBackground").getValue()!=null){
+                    settingBackground=dataSnapshot.child(IMEINumber).child("workOnBackground").getValue().toString().equalsIgnoreCase("true");
+                }
+                else{
+                    settingBackground=true;
+                }
+                workOnBackground.setChecked(settingBackground);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+
+
+        });
+
+
+
+
+        //workOnBackground.setChecked(true);
+        workOnBackground.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                shouldWorkOnBackgroun=workOnBackground.isChecked();
+
+            }
+        });
+        progressBar.setProgress(50);
+        seconds.setText("50");
+
+        //Handling record duration seekbar object.
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
 
                 progressBar.setProgress(i);
-                seconds.setText(""+ i +"");
-                recordSeconds=i;
+                seconds.setText("" + i + "");
+                recordSeconds = i;
             }
 
             @Override
@@ -118,21 +158,30 @@ public class SettingsActivity extends Activity {
         phoneInput3 = (EditText) findViewById(R.id.phoneInput3);
 
         submitButton = (Button) findViewById(R.id.submit);
-        AddedPhones=(TextView) findViewById(R.id.addedPhones);
+        AddedPhones = (TextView) findViewById(R.id.addedPhones);
 
 
         ValueEventListener postListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // Get Post object and use the values to update the UI
-                if(dataSnapshot.child(IMEINumber+"").exists()){
+                if (dataSnapshot.child(IMEINumber + "").exists()) {
                     //AddedPhones.setText("Numbers that you have added: \n-"+dataSnapshot.child(IMEINumber).child("number1").getValue()+"\n-"+dataSnapshot.child(IMEINumber).child("number2").getValue()+"\n-"+dataSnapshot.child(IMEINumber).child("number3").getValue());
                     phoneInput1.setText(dataSnapshot.child(IMEINumber).child("number1").getValue().toString());
                     phoneInput2.setText(dataSnapshot.child(IMEINumber).child("number2").getValue().toString());
                     phoneInput3.setText(dataSnapshot.child(IMEINumber).child("number3").getValue().toString());
                     seconds.setText(dataSnapshot.child(IMEINumber).child("recordTime").getValue().toString());
                     progressBar.setProgress(Integer.parseInt(dataSnapshot.child(IMEINumber).child("recordTime").getValue().toString()));
-                    user = new User(dataSnapshot.child(IMEINumber).child("number1").getValue().toString(), dataSnapshot.child(IMEINumber).child("number2").getValue().toString(), dataSnapshot.child(IMEINumber).child("number3").getValue().toString(),IMEINumber,progressBar.getProgress());
+
+                    boolean settingBackground;
+                    if(dataSnapshot.child(IMEINumber).child("workOnBackground").getValue()==null){
+                        settingBackground=workOnBackground.isChecked();
+                    }
+                   else{
+                        settingBackground=dataSnapshot.child(IMEINumber).child("workOnBackground").getValue().toString().equalsIgnoreCase("true");
+                    }
+                    workOnBackground.setChecked(settingBackground);
+                    user = new User(dataSnapshot.child(IMEINumber).child("number1").getValue().toString(), dataSnapshot.child(IMEINumber).child("number2").getValue().toString(), dataSnapshot.child(IMEINumber).child("number3").getValue().toString(), IMEINumber, progressBar.getProgress(),settingBackground);
                     //myRef.child(IMEINumber).setValue(user);
                 }
 
@@ -178,7 +227,7 @@ public class SettingsActivity extends Activity {
                     showToast("Now your emergency list is ready!!");
 
                     //Putting needed variables into firebase database.
-                    user = new User(phoneNumber1, phoneNumber2, phoneNumber3,IMEINumber,progressBar.getProgress());
+                    user = new User(phoneNumber1, phoneNumber2, phoneNumber3, IMEINumber, progressBar.getProgress(), workOnBackground.isChecked());
                     myRef.child(IMEINumber).setValue(user);
 
                     Intent intent = new Intent(SettingsActivity.this, SensorActivity.class);
@@ -186,13 +235,12 @@ public class SettingsActivity extends Activity {
                 }
 
 
-
             }
         });
     }
 
-    public void showToast(String text){
-        Toast.makeText(SettingsActivity.this,text,Toast.LENGTH_LONG).show();
+    public void showToast(String text) {
+        Toast.makeText(SettingsActivity.this, text, Toast.LENGTH_LONG).show();
     }
 }
 
