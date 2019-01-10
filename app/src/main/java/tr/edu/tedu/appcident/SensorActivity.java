@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -57,7 +56,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -65,7 +63,6 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
 
 /*
@@ -79,6 +76,10 @@ import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
  * */
 
 public class SensorActivity extends AppCompatActivity implements SensorEventListener, SurfaceHolder.Callback /*, View.OnClickListener, SurfaceHolder.Callback*/ {
+
+    /*
+     *  Main activity's variables
+     */
     private static final int INTENTCAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
     private SensorManager mSensorManager;
     private Sensor mPressure;
@@ -90,13 +91,9 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     static boolean isEmergancyMode;
     static boolean shouldGoIntoEmergencyMode;
     private static String IMEINumber;
-    static String currentPath;
 
     private Button start, stop, startService;
-    String mUserLocation = "Cannot find address";
 
-
-    private float accelerationCurrent, accelerationLast, acceleration;
 
     public Vibrator v;
     double LAT, LON;
@@ -114,6 +111,12 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     public static SurfaceView mSurfaceView;
     public static SurfaceHolder mSurfaceHolder;
 
+
+    DatabaseReference myRef;
+
+    /*
+        Oncreate method. In this method, we initialize everything in this activity.
+     */
     @SuppressLint("MissingPermission")
     @Override
     public final void onCreate(Bundle savedInstanceState) {
@@ -134,10 +137,10 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                 }
                 for (Location location : locationResult.getLocations()) {
                     if (location != null) {
-                        Log.e("NOTNULLLOCC",location.toString());
-                        LAT=location.getLatitude();
-                        LON=location.getLongitude();
-                        currentAddress=getCompleteAddress(LAT,LON);
+                        Log.e("NOTNULLLOCC", location.toString());
+                        LAT = location.getLatitude();
+                        LON = location.getLongitude();
+                        currentAddress = getCompleteAddress(LAT, LON);
                     }
                 }
             }
@@ -158,15 +161,14 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                     @Override
                     public void onSuccess(Location location) {
                         // Got last known location. In some rare situations this can be null.
-                        Log.e(" GELDİ AMA NULL","olabilir");
+                        Log.e(" GELDİ AMA NULL", "olabilir");
                         if (location != null) {
-                            Log.e("LOCATION",location.toString());
-                            LAT=location.getLatitude();
-                            LON=location.getLongitude();
-                            currentAddress=getCompleteAddress(LAT,LON);
-                        }
-                        else{
-                            currentAddress="We could not determine address.";
+                            Log.e("LOCATION", location.toString());
+                            LAT = location.getLatitude();
+                            LON = location.getLongitude();
+                            currentAddress = getCompleteAddress(LAT, LON);
+                        } else {
+                            currentAddress = "We could not determine address.";
                         }
                     }
                 });
@@ -206,18 +208,20 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         }*/
 
 
+        //Connecting to the firebase database.
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("Users").child(IMEINumber);
+        myRef = database.getReference("Users").child(IMEINumber);
 
+
+        //Getting user's record time setting.
         myRef.child("recordTime").addValueEventListener(new ValueEventListener() {
 
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() != null){
-                    seconds=Integer.parseInt(dataSnapshot.getValue().toString());
-                    Log.d("dataSnapshot.child: ",dataSnapshot.getValue().toString());
-                }
-                else {
+                if (dataSnapshot.getValue() != null) {
+                    seconds = Integer.parseInt(dataSnapshot.getValue().toString());
+                    Log.d("dataSnapshot.child: ", dataSnapshot.getValue().toString());
+                } else {
                     Intent intent = new Intent(SensorActivity.this, SettingsActivity.class);
                     intent.putExtra("IMEINumber", IMEINumber);
                     startActivity(intent);
@@ -240,7 +244,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         //Connection between layout and activity.
         start = (Button) findViewById(R.id.start);
         stop = (Button) findViewById(R.id.stop);
-        startService = (Button)findViewById(R.id.buttonService);
+        startService = (Button) findViewById(R.id.buttonService);
 
         output = (TextView) findViewById(R.id.label_light);
 
@@ -253,9 +257,9 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         mLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         mRotation = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
-        accelerationCurrent = SensorManager.GRAVITY_EARTH;
-        accelerationLast = SensorManager.GRAVITY_EARTH;
-        acceleration = 0.0f;
+        float accelerationCurrent = SensorManager.GRAVITY_EARTH;
+        float accelerationLast = SensorManager.GRAVITY_EARTH;
+        float acceleration = 0.0f;
 
         textt = (TextView) findViewById(R.id.label_light);
 
@@ -263,7 +267,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                emergencyMode();
+                ShouldEmergencyMode();
             }
         });
 
@@ -302,12 +306,14 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         startService.performClick();
 
         //Checking if the sensor service sends emergency mode message through Extras.
-        if (getIntent().getExtras() != null && getIntent().getExtras().getString("isBacked1").equals("trueee")){
+        if (getIntent().getExtras() != null && getIntent().getExtras().getString("isBacked1").equals("trueee")) {
             start.performClick();
         }
 
     }
 
+
+    //Creating toolbar menu.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -315,6 +321,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         return true;
     }
 
+    //Items selection in toolbar menu
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.settings) {
@@ -325,7 +332,6 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         }
         return super.onOptionsItemSelected(item);
     }
-
 
 
     @Override
@@ -341,16 +347,19 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         super.onStop();
     }
 
+
+    //This method send an sms with Telephone's SMS Manager.
     private void sendSMS(String phoneNumber, String message) {
         SmsManager sms = SmsManager.getDefault();
         sms.sendTextMessage(phoneNumber, null, message, null, null);
     }
 
 
-
     public void onPrepared(MediaPlayer player) {
     }
 
+
+    //This method includes every tasks in emergency moda.
     private void doOnEmergency() {
 
         mFusedLocationClient.getLastLocation()
@@ -358,15 +367,14 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                     @Override
                     public void onSuccess(Location location) {
                         // Got last known location. In some rare situations this can be null.
-                        Log.e(" GELDİ AMA NULL","olabilir");
+                        Log.e(" GELDİ AMA NULL", "olabilir");
                         if (location != null) {
-                            Log.e("LOCATION",location.toString());
-                            LAT=location.getLatitude();
-                            LON=location.getLongitude();
-                            currentAddress=getCompleteAddress(LAT,LON);
-                        }
-                        else{
-                            currentAddress="We could not determine address.";
+                            Log.e("LOCATION", location.toString());
+                            LAT = location.getLatitude();
+                            LON = location.getLongitude();
+                            currentAddress = getCompleteAddress(LAT, LON);
+                        } else {
+                            currentAddress = "We could not determine address.";
                         }
                     }
                 });
@@ -391,7 +399,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                textt.setText("We send an sms to your friends: \"Your friend may be in trouble in  " + LAT+", "+ LON+" , "+currentAddress+"\"");
+                textt.setText("We send an sms to your friends: \"Your friend may be in trouble in  (LAT = " + LAT + " , LON = " + LON + ") , " + currentAddress + "\"");
             }
         });
 
@@ -412,10 +420,10 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
             e.printStackTrace();
         }*/
 
-        if(currentAddress==null || currentAddress.equalsIgnoreCase("null")){
-            currentAddress="Cannot determined";
+        if (currentAddress == null || currentAddress.equalsIgnoreCase("null")) {
+            currentAddress = "Cannot determined";
         }
-        sendSMS("+905058978796", "Your friend may be in trouble in " + LAT+", "+ LON+" , "+currentAddress);
+        sendSMS("+905058978796", "Your friend may be in trouble in  (LAT = " + LAT + " , LON = " + LON + ") , " + currentAddress);
         File folder = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + "APPCIDENT");
         if (!folder.exists()) {
             folder.mkdirs();
@@ -436,7 +444,7 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                         public void run() {
                             doOnStoppingEmergency();
                         }
-                    }, seconds*1000);
+                    }, seconds * 1000);
                 }
             });
         } catch (IllegalStateException e) {
@@ -446,11 +454,13 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
 
     }
 
-    public void doOnStoppingEmergency(){
+    public void doOnStoppingEmergency() {
         stop.performClick();
     }
 
 
+
+    //This method connects to the Google Geocoder service and converts taken lat and lot info into string address information.
     public String getCompleteAddress(double latitude, double longitude) {
         String location = "";
         try {
@@ -485,20 +495,20 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.d("LOCATION:",location);
+        Log.d("LOCATION:", location);
         return location;
     }
 
-       @Override
-       public final void onAccuracyChanged(Sensor sensor, int accuracy) {
-           // Do something here if sensor accuracy changes.
-       }
+    @Override
+    public final void onAccuracyChanged(Sensor sensor, int accuracy) {
+        // Do something here if sensor accuracy changes.
+    }
 
-       @SuppressLint("StringFormatInvalid")
-       @Override
-       public final void onSensorChanged(SensorEvent event) {
+    @SuppressLint("StringFormatInvalid")
+    @Override
+    public final void onSensorChanged(SensorEvent event) {
 
-        }
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -579,7 +589,8 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
     }
 
 
-    protected void emergencyMode() {
+    //This method asks user if s/he is okay, if not goes into emergency mode.
+    protected void ShouldEmergencyMode() {
 
         if (!isEmergancyMode) {
             isEmergancyMode = true;
@@ -599,9 +610,9 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             dialog.cancel();
-                            textt.setText("Everything's okay!");
+                            textt.setText(R.string.im_okay);
                             shouldGoIntoEmergencyMode = false;
-                            isEmergancyMode=false;
+                            isEmergancyMode = false;
                             r.stop();
                         }
                     });
@@ -642,7 +653,6 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
             }, 20000); // the timer will count 5 seconds....
 
 
-
         } else {
             //shouldGoIntoEmergencyMode=false;
         }
@@ -663,20 +673,20 @@ public class SensorActivity extends AppCompatActivity implements SensorEventList
                                int height) {
     }
 
-        public void getInfo(View view) {
-            AlertDialog.Builder builder1 = new AlertDialog.Builder(SensorActivity.this);
-            builder1.setMessage("This app is prepared to help you in moments of accident and emergency. Please make sure you have adjusted your settings correctly before you start using the appcident.");
-            builder1.setCancelable(true);
+    public void getInfo(View view) {
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(SensorActivity.this);
+        builder1.setMessage("This app is prepared to help you in moments of accident and emergency. Please make sure you have adjusted your settings correctly before you start using the appcident.");
+        builder1.setCancelable(true);
 
-            builder1.setPositiveButton(
-                    "Understand!",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
-            AlertDialog alert11 = builder1.create();
-            alert11.show();
-        }
+        builder1.setPositiveButton(
+                "Understand!",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alert11 = builder1.create();
+        alert11.show();
+    }
 
 }
